@@ -252,7 +252,7 @@
           </div>
         </div>
 
-        <!-- NEW: 3-GENERATION PEDIGREE LINEAGE DISPLAY -->
+        <!-- 3-GENERATION PEDIGREE LINEAGE DISPLAY -->
         <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -282,7 +282,7 @@
           <div id="detail-health-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2"></div>
         </div>
 
-        <!-- NEW: PUPPY GROWTH MILESTONES -->
+        <!-- PUPPY GROWTH MILESTONES -->
         <div class="bg-white border border-brand-border/60 rounded-3xl p-6 space-y-3">
           <h3 class="font-display font-bold text-lg text-brand-dark">Puppy Growth & Health Milestones</h3>
           <div id="detail-growth-milestones" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1"></div>
@@ -935,7 +935,7 @@
           </div>
         </div>
 
-        <!-- NEW: PEDIGREE PARENTS SELECTION -->
+        <!-- PEDIGREE PARENTS SELECTION -->
         <div class="p-3 bg-brand-light/50 rounded-2xl border border-brand-border/60 space-y-2">
           <span class="block text-[10px] font-bold uppercase text-brand-dark">Pedigree Lineage (Parents)</span>
           <div class="grid grid-cols-2 gap-2">
@@ -1048,7 +1048,7 @@
           <textarea id="litter-desc" rows="3" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Health tested, raised indoors with ENS..."></textarea>
         </div>
 
-        <!-- NEW: DOGS NZ / ANIMAL WELFARE CODE OF ETHICS PLEDGE -->
+        <!-- DOGS NZ / ANIMAL WELFARE CODE OF ETHICS PLEDGE -->
         <div class="p-3 bg-dogsnz-light border border-dogsnz-gold/40 rounded-2xl space-y-2 text-xs text-dogsnz-blue">
           <div class="flex items-center space-x-2">
             <i class="fa-solid fa-hand-holding-heart text-dogsnz-gold"></i>
@@ -1132,7 +1132,7 @@
     </div>
   </div>
 
-  <!-- NEW: Modal for Puppy Growth Milestone Update -->
+  <!-- Modal for Puppy Growth Milestone Update -->
   <div id="modal-milestone-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
       <div class="flex justify-between items-center mb-4">
@@ -1199,7 +1199,7 @@
 
       <div id="stripe-checkout-summary" class="bg-brand-light p-4 rounded-2xl border border-brand-border/60 text-xs space-y-2"></div>
 
-      <!-- NEW: STANDARDIZED NZ PUPPY PURCHASE AGREEMENT ACCORDION -->
+      <!-- STANDARDIZED NZ PUPPY PURCHASE AGREEMENT ACCORDION -->
       <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] text-slate-700 space-y-2">
         <div class="flex items-center justify-between font-bold text-brand-dark">
           <span><i class="fa-solid fa-file-contract text-brand-pink mr-1"></i> New Zealand Holding Trust Agreement</span>
@@ -2096,7 +2096,322 @@
       document.getElementById('dog-pedigree-dam').value = dog.pedigreeDam || '';
       document.getElementById('dog-photo-url').value = dog.photo || '';
       document.getElementById('dog-health').value = dog.health || '';
-      document.getElementById('modal-dog-title').innerText = `Edit: ${dog.callName}`;  window.openModal('modal-dog-form'); };  window.deleteDog = function(dogId) { if (confirm("Are you sure you want to delete this dog profile?")) { window.appData.dogs = window.appData.dogs.filter(d => d.id !== dogId); window.saveData(); window.showToast("Dog profile removed."); } };  window.openDogDocModal = function(dogId) { const dog = window.appData.dogs.find(d => d.id === dogId); if (!dog) return; document.getElementById('form-dog-doc').reset(); document.getElementById('doc-dog-id').value = dog.id; document.getElementById('doc-dog-name-sub').innerText = `Dog: ${dog.callName} (${dog.name})`; window.openModal('modal-dog-doc'); };  window.handleDogDocSubmit = async function(e) { e.preventDefault(); const saveBtn = document.getElementById('btn-save-doc'); saveBtn.innerText = "Uploading Document..."; saveBtn.disabled = true;  try { const dogId = document.getElementById('doc-dog-id').value; const title = document.getElementById('doc-title').value.trim(); const fileInput = document.getElementById('doc-file');  let fileUrl = null; if (fileInput && fileInput.files && fileInput.files[0]) { fileUrl = await uploadImageFile(fileInput.files[0], 'docs'); }  if (!fileUrl) { alert("Please select a file to upload."); return; }  const dog = window.appData.dogs.find(d => d.id === dogId); if (dog) { if (!dog.documents) dog.documents = []; dog.documents.push({ id: 'doc-' + Date.now(), title: title, url: fileUrl, uploadedAt: new Date().toLocaleDateString() }); }  window.saveData(); window.closeModal('modal-dog-doc'); window.showToast("Health clearance certificate attached!"); } catch (err) { alert("Upload error: " + err.message); } finally { saveBtn.innerText = "Upload Certificate"; saveBtn.disabled = false; } };  window.handleDogFormSubmit = async function(e) { e.preventDefault(); const saveBtn = document.getElementById('btn-save-dog'); saveBtn.innerText = "Saving Profile..."; saveBtn.disabled = true;  try { const editId = document.getElementById('dog-edit-id').value; let photoUrl = document.getElementById('dog-photo-url').value.trim(); const fileInput = document.getElementById('dog-photo-file');  if (fileInput && fileInput.files && fileInput.files[0]) { const uploaded = await uploadImageFile(fileInput.files[0], 'dogs'); if (uploaded) photoUrl = uploaded; }  if (!photoUrl && editId) { const existing = window.appData.dogs.find(d => d.id === editId); if (existing) photoUrl = existing.photo; }  if (!photoUrl) { photoUrl = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'; }  const payload = { name: document.getElementById('dog-name').value, call_name: document.getElementById('dog-callname').value, role: document.getElementById('dog-role').value, breed: document.getElementById('dog-breed').value, dob: document.getElementById('dog-dob').value, photo: photoUrl, health: document.getElementById('dog-health').value, pedigreeSire: document.getElementById('dog-pedigree-sire').value, pedigreeDam: document.getElementById('dog-pedigree-dam').value, owner_id: window.appData.currentUser.id };  if (editId) { if (window.supabaseClient && !editId.startsWith('dog-')) { await window.supabaseClient.from('dogs').update(payload).eq('id', editId); } const dog = window.appData.dogs.find(d => d.id === editId); if (dog) Object.assign(dog, { ...payload, callName: payload.call_name }); } else { let assignedId = 'dog-' + Date.now(); if (window.supabaseClient) { const { data } = await window.supabaseClient.from('dogs').insert(payload).select().single(); if (data) assignedId = data.id; } window.appData.dogs.push({ id: assignedId, callName: payload.call_name, documents: [], ...payload }); }  window.saveData(); window.closeModal('modal-dog-form'); window.showToast("Breeding dog profile updated successfully!"); } catch (err) { alert("Error saving dog: " + err.message); } finally { saveBtn.innerText = "Save Dog"; saveBtn.disabled = false; } };  // LITTERS & PUPPIES window.openAddLitterModal = function() { document.getElementById('form-litter').reset(); document.getElementById('litter-edit-id').value = ''; window.openModal('modal-litter-form'); };  window.handleLitterFormSubmit = async function(e) { e.preventDefault(); const saveBtn = document.getElementById('btn-save-litter'); saveBtn.innerText = "Uploading Cover..."; saveBtn.disabled = true;  try { const editId = document.getElementById('litter-edit-id').value; let photo = document.getElementById('litter-photo').value.trim(); const fileInput = document.getElementById('litter-photo-file');  if (fileInput && fileInput.files && fileInput.files[0]) { const uploaded = await uploadImageFile(fileInput.files[0], 'litters'); if (uploaded) photo = uploaded; }  if (!photo) { photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'; }  const isDNZ = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';  const payload = { name: document.getElementById('litter-name').value, dob: document.getElementById('litter-dob').value, ready_date: document.getElementById('litter-ready-date').value, price: Number(document.getElementById('litter-price').value), breed: document.getElementById('litter-breed').value, location: window.appData.settings.location, breeder_name: window.appData.settings.kennelName, photo: photo, isDogsNZ: isDNZ, dogsNZPrefix: isDNZ ? window.appData.dogsNZCredentials.prefix : '', description: document.getElementById('litter-desc').value, owner_id: window.appData.currentUser.id, milestones: [ { stage: "Whelping Day", notes: "Litter safely born. Monitored 24/7 in temperature regulated box." } ] };  if (editId) { const litter = window.appData.litters.find(l => l.id === editId); if (litter) { Object.assign(litter, payload, { gallery: [photo] }); } } else { let assignedId = 'litter-' + Date.now(); if (window.supabaseClient) { const { data } = await window.supabaseClient.from('litters').insert({ ...payload, is_published: true }).select().single(); if (data) assignedId = data.id; } window.appData.litters.push({ id: assignedId, ...payload, isPublished: true, gallery: [photo], puppies: [] }); }  window.saveData(); window.closeModal('modal-litter-form'); window.showToast("Litter saved & listed on marketplace!"); } catch (err) { alert("Litter save error: " + err.message); } finally { saveBtn.innerText = "Save Litter"; saveBtn.disabled = false; } };  window.openAddPuppyModal = function(litterId) { document.getElementById('form-puppy').reset(); document.getElementById('puppy-litter-id').value = litterId; document.getElementById('puppy-edit-id').value = ''; window.openModal('modal-puppy-form'); };  window.openMilestoneModal = function(litterId) { document.getElementById('milestone-litter-id').value = litterId; window.openModal('modal-milestone-form'); };  window.handleMilestoneSubmit = function(e) { e.preventDefault(); const lid = document.getElementById('milestone-litter-id').value; const litter = window.appData.litters.find(l => l.id === lid); if (litter) { if (!litter.milestones) litter.milestones = []; litter.milestones.push({ stage: document.getElementById('milestone-stage').value, notes: document.getElementById('milestone-notes').value }); window.saveData(); window.closeModal('modal-milestone-form'); window.showToast("Puppy milestone posted to marketplace!"); } };  window.handlePuppyFormSubmit = async function(e) { e.preventDefault(); const saveBtn = document.getElementById('btn-save-puppy'); saveBtn.innerText = "Uploading Puppy..."; saveBtn.disabled = true;  try { const litterId = document.getElementById('puppy-litter-id').value; const puppyEditId = document.getElementById('puppy-edit-id').value; const litter = window.appData.litters.find(l => l.id === litterId);  let photo = document.getElementById('puppy-photo').value.trim(); const fileInput = document.getElementById('puppy-photo-file');  if (fileInput && fileInput.files && fileInput.files[0]) { const uploaded = await uploadImageFile(fileInput.files[0], 'puppies'); if (uploaded) photo = uploaded; }  if (!photo) photo = (litter.gallery && litter.gallery[0]) \vert{}\vert{} 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80';  const puppyPayload = { collar: document.getElementById('puppy-identifier').value, gender: document.getElementById('puppy-gender').value, color: document.getElementById('puppy-color').value, microchip: document.getElementById('puppy-chip').value, price: Number(document.getElementById('puppy-price').value), status: document.getElementById('puppy-status').value, photo: photo, owner_id: window.appData.currentUser.id, litter_id: litterId };  if (litter) { if (!litter.puppies) litter.puppies = []; if (puppyEditId) { const pup = litter.puppies.find(p => p.id === puppyEditId); if (pup) Object.assign(pup, puppyPayload, { identifier: puppyPayload.collar }); } else { litter.puppies.push({ id: 'p-' + Date.now(), ...puppyPayload, identifier: puppyPayload.collar }); } }  window.saveData(); window.closeModal('modal-puppy-form'); window.showToast("Puppy profile saved with photo!"); } catch (err) { alert("Puppy save error: " + err.message); } finally { saveBtn.innerText = "Save Puppy"; saveBtn.disabled = false; } };  // REQUEST PAPERWORK MODULE window.handleRequestPaperwork = function() { const activeLitter = window.publicMarketplaceLitters[0] \vert{}\vert{} window.appData.litters[0]; const buyerName = window.appData.currentUser ? window.appData.currentUser.email : "Prospective Family";  window.appData.notifications.unshift({ id: 'notif-' + Date.now(), type: 'paperwork', title: 'DNA & Health Paperwork Request', msg: `${buyerName} requested verified veterinary & genetic paperwork for ${activeLitter.name}.`, date: new Date().toLocaleDateString(), read: false });  window.saveData(); window.showToast("Request sent! The breeder has been notified to release certificates.", "fa-file-shield"); };  window.releasePaperworkToBuyer = function() { window.showToast("Official DNA & health certificates released to buyer inbox!", "fa-circle-check"); };  // INBOX & MESSAGING ENGINE window.openNewMessageModal = function() { const select = document.getElementById('msg-recipient-select'); const recipients = [ ...window.appData.buyers.map(b => ({ label: `${b.name} (Waitlist Buyer)`, id: b.contact })),
+      document.getElementById('modal-dog-title').innerText = `Edit: ${dog.callName}`;
+
+      window.openModal('modal-dog-form');
+    };
+
+    window.deleteDog = function(dogId) {
+      if (confirm("Are you sure you want to delete this dog profile?")) {
+        window.appData.dogs = window.appData.dogs.filter(d => d.id !== dogId);
+        window.saveData();
+        window.showToast("Dog profile removed.");
+      }
+    };
+
+    window.openDogDocModal = function(dogId) {
+      const dog = window.appData.dogs.find(d => d.id === dogId);
+      if (!dog) return;
+      document.getElementById('form-dog-doc').reset();
+      document.getElementById('doc-dog-id').value = dog.id;
+      document.getElementById('doc-dog-name-sub').innerText = `Dog: ${dog.callName} (${dog.name})`;
+      window.openModal('modal-dog-doc');
+    };
+
+    window.handleDogDocSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btn-save-doc');
+      saveBtn.innerText = "Uploading Document...";
+      saveBtn.disabled = true;
+
+      try {
+        const dogId = document.getElementById('doc-dog-id').value;
+        const title = document.getElementById('doc-title').value.trim();
+        const fileInput = document.getElementById('doc-file');
+
+        let fileUrl = null;
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          fileUrl = await uploadImageFile(fileInput.files[0], 'docs');
+        }
+
+        if (!fileUrl) {
+          alert("Please select a file to upload.");
+          return;
+        }
+
+        const dog = window.appData.dogs.find(d => d.id === dogId);
+        if (dog) {
+          if (!dog.documents) dog.documents = [];
+          dog.documents.push({
+            id: 'doc-' + Date.now(),
+            title: title,
+            url: fileUrl,
+            uploadedAt: new Date().toLocaleDateString()
+          });
+        }
+
+        window.saveData();
+        window.closeModal('modal-dog-doc');
+        window.showToast("Health clearance certificate attached!");
+      } catch (err) {
+        alert("Upload error: " + err.message);
+      } finally {
+        saveBtn.innerText = "Upload Certificate";
+        saveBtn.disabled = false;
+      }
+    };
+
+    window.handleDogFormSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btn-save-dog');
+      saveBtn.innerText = "Saving Profile...";
+      saveBtn.disabled = true;
+
+      try {
+        const editId = document.getElementById('dog-edit-id').value;
+        let photoUrl = document.getElementById('dog-photo-url').value.trim();
+        const fileInput = document.getElementById('dog-photo-file');
+        
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const uploaded = await uploadImageFile(fileInput.files[0], 'dogs');
+          if (uploaded) photoUrl = uploaded;
+        }
+
+        if (!photoUrl && editId) {
+          const existing = window.appData.dogs.find(d => d.id === editId);
+          if (existing) photoUrl = existing.photo;
+        }
+
+        if (!photoUrl) {
+          photoUrl = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
+        }
+
+        const payload = {
+          name: document.getElementById('dog-name').value,
+          call_name: document.getElementById('dog-callname').value,
+          role: document.getElementById('dog-role').value,
+          breed: document.getElementById('dog-breed').value,
+          dob: document.getElementById('dog-dob').value,
+          photo: photoUrl,
+          health: document.getElementById('dog-health').value,
+          pedigreeSire: document.getElementById('dog-pedigree-sire').value,
+          pedigreeDam: document.getElementById('dog-pedigree-dam').value,
+          owner_id: window.appData.currentUser.id
+        };
+
+        if (editId) {
+          if (window.supabaseClient && !editId.startsWith('dog-')) {
+            await window.supabaseClient.from('dogs').update(payload).eq('id', editId);
+          }
+          const dog = window.appData.dogs.find(d => d.id === editId);
+          if (dog) Object.assign(dog, { ...payload, callName: payload.call_name });
+        } else {
+          let assignedId = 'dog-' + Date.now();
+          if (window.supabaseClient) {
+            const { data } = await window.supabaseClient.from('dogs').insert(payload).select().single();
+            if (data) assignedId = data.id;
+          }
+          window.appData.dogs.push({ id: assignedId, callName: payload.call_name, documents: [], ...payload });
+        }
+
+        window.saveData();
+        window.closeModal('modal-dog-form');
+        window.showToast("Breeding dog profile updated successfully!");
+      } catch (err) {
+        alert("Error saving dog: " + err.message);
+      } finally {
+        saveBtn.innerText = "Save Dog";
+        saveBtn.disabled = false;
+      }
+    };
+
+    // LITTERS & PUPPIES
+    window.openAddLitterModal = function() {
+      document.getElementById('form-litter').reset();
+      document.getElementById('litter-edit-id').value = '';
+      window.openModal('modal-litter-form');
+    };
+
+    window.handleLitterFormSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btn-save-litter');
+      saveBtn.innerText = "Uploading Cover...";
+      saveBtn.disabled = true;
+
+      try {
+        const editId = document.getElementById('litter-edit-id').value;
+        let photo = document.getElementById('litter-photo').value.trim();
+        const fileInput = document.getElementById('litter-photo-file');
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const uploaded = await uploadImageFile(fileInput.files[0], 'litters');
+          if (uploaded) photo = uploaded;
+        }
+
+        if (!photo) {
+          photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80';
+        }
+
+        const isDNZ = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';
+
+        const payload = {
+          name: document.getElementById('litter-name').value,
+          dob: document.getElementById('litter-dob').value,
+          ready_date: document.getElementById('litter-ready-date').value,
+          price: Number(document.getElementById('litter-price').value),
+          breed: document.getElementById('litter-breed').value,
+          location: window.appData.settings.location,
+          breeder_name: window.appData.settings.kennelName,
+          photo: photo,
+          isDogsNZ: isDNZ,
+          dogsNZPrefix: isDNZ ? window.appData.dogsNZCredentials.prefix : '',
+          description: document.getElementById('litter-desc').value,
+          owner_id: window.appData.currentUser.id,
+          milestones: [
+            { stage: "Whelping Day", notes: "Litter safely born. Monitored 24/7 in temperature regulated box." }
+          ]
+        };
+
+        if (editId) {
+          const litter = window.appData.litters.find(l => l.id === editId);
+          if (litter) {
+            Object.assign(litter, payload, { gallery: [photo] });
+          }
+        } else {
+          let assignedId = 'litter-' + Date.now();
+          if (window.supabaseClient) {
+            const { data } = await window.supabaseClient.from('litters').insert({ ...payload, is_published: true }).select().single();
+            if (data) assignedId = data.id;
+          }
+          window.appData.litters.push({
+            id: assignedId,
+            ...payload,
+            isPublished: true,
+            gallery: [photo],
+            puppies: []
+          });
+        }
+
+        window.saveData();
+        window.closeModal('modal-litter-form');
+        window.showToast("Litter saved & listed on marketplace!");
+      } catch (err) {
+        alert("Litter save error: " + err.message);
+      } finally {
+        saveBtn.innerText = "Save Litter";
+        saveBtn.disabled = false;
+      }
+    };
+
+    window.openAddPuppyModal = function(litterId) {
+      document.getElementById('form-puppy').reset();
+      document.getElementById('puppy-litter-id').value = litterId;
+      document.getElementById('puppy-edit-id').value = '';
+      window.openModal('modal-puppy-form');
+    };
+
+    window.openMilestoneModal = function(litterId) {
+      document.getElementById('milestone-litter-id').value = litterId;
+      window.openModal('modal-milestone-form');
+    };
+
+    window.handleMilestoneSubmit = function(e) {
+      e.preventDefault();
+      const lid = document.getElementById('milestone-litter-id').value;
+      const litter = window.appData.litters.find(l => l.id === lid);
+      if (litter) {
+        if (!litter.milestones) litter.milestones = [];
+        litter.milestones.push({
+          stage: document.getElementById('milestone-stage').value,
+          notes: document.getElementById('milestone-notes').value
+        });
+        window.saveData();
+        window.closeModal('modal-milestone-form');
+        window.showToast("Puppy milestone posted to marketplace!");
+      }
+    };
+
+    window.handlePuppyFormSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btn-save-puppy');
+      saveBtn.innerText = "Uploading Puppy...";
+      saveBtn.disabled = true;
+
+      try {
+        const litterId = document.getElementById('puppy-litter-id').value;
+        const puppyEditId = document.getElementById('puppy-edit-id').value;
+        const litter = window.appData.litters.find(l => l.id === litterId);
+
+        let photo = document.getElementById('puppy-photo').value.trim();
+        const fileInput = document.getElementById('puppy-photo-file');
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const uploaded = await uploadImageFile(fileInput.files[0], 'puppies');
+          if (uploaded) photo = uploaded;
+        }
+
+        if (!photo) photo = (litter.gallery && litter.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80';
+
+        const puppyPayload = {
+          collar: document.getElementById('puppy-identifier').value,
+          gender: document.getElementById('puppy-gender').value,
+          color: document.getElementById('puppy-color').value,
+          microchip: document.getElementById('puppy-chip').value,
+          price: Number(document.getElementById('puppy-price').value),
+          status: document.getElementById('puppy-status').value,
+          photo: photo,
+          owner_id: window.appData.currentUser.id,
+          litter_id: litterId
+        };
+
+        if (litter) {
+          if (!litter.puppies) litter.puppies = [];
+          if (puppyEditId) {
+            const pup = litter.puppies.find(p => p.id === puppyEditId);
+            if (pup) Object.assign(pup, puppyPayload, { identifier: puppyPayload.collar });
+          } else {
+            litter.puppies.push({ id: 'p-' + Date.now(), ...puppyPayload, identifier: puppyPayload.collar });
+          }
+        }
+
+        window.saveData();
+        window.closeModal('modal-puppy-form');
+        window.showToast("Puppy profile saved with photo!");
+      } catch (err) {
+        alert("Puppy save error: " + err.message);
+      } finally {
+        saveBtn.innerText = "Save Puppy";
+        saveBtn.disabled = false;
+      }
+    };
+
+    // REQUEST PAPERWORK MODULE
+    window.handleRequestPaperwork = function() {
+      const activeLitter = window.publicMarketplaceLitters[0] || window.appData.litters[0];
+      const buyerName = window.appData.currentUser ? window.appData.currentUser.email : "Prospective Family";
+
+      window.appData.notifications.unshift({
+        id: 'notif-' + Date.now(),
+        type: 'paperwork',
+        title: 'DNA & Health Paperwork Request',
+        msg: `${buyerName} requested verified veterinary & genetic paperwork for ${activeLitter.name}.`,
+        date: new Date().toLocaleDateString(),
+        read: false
+      });
+
+      window.saveData();
+      window.showToast("Request sent! The breeder has been notified to release certificates.", "fa-file-shield");
+    };
+
+    window.releasePaperworkToBuyer = function() {
+      window.showToast("Official DNA & health certificates released to buyer inbox!", "fa-circle-check");
+    };
+
+    // INBOX & MESSAGING ENGINE
+    window.openNewMessageModal = function() {
+      const select = document.getElementById('msg-recipient-select');
+      const recipients = [
+        ...window.appData.buyers.map(b => ({ label: `${b.name} (Waitlist Buyer)`, id: b.contact })),
         { label: "Highland Pedigrees NZ (Dogs NZ Certified)", id: "highland@wellbred.co.nz" },
         { label: "Southern Working Paws (Verified Breeder)", id: "collies@nzrural.co.nz" }
       ];
@@ -2145,7 +2460,8 @@
       list.innerHTML = window.appData.conversations.map(c => `
         <div onclick="window.selectChatContact('${c.contact}')" class="p-4 cursor-pointer hover:bg-brand-light/60 transition ${currentActiveChatContact === c.contact ? 'bg-brand-light border-l-4 border-brand-pink' : ''}">
           <div class="flex justify-between items-center mb-1">
-            <h5 class="text-xs font-bold text-brand-dark truncate max-w-[150px]">${c.contact}</h5>${c.unread > 0 ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-accent text-white">${c.unread} new</span>` : ''}
+            <h5 class="text-xs font-bold text-brand-dark truncate max-w-[150px]">${c.contact}</h5>
+            ${c.unread > 0 ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-accent text-white">${c.unread} new</span>` : ''}
           </div>
           <p class="text-[11px] text-slate-500 truncate">${c.messages.length ? c.messages[c.messages.length - 1].text : 'No messages'}</p>
         </div>
@@ -2303,7 +2619,11 @@
                   <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${t.desc}</p>
                 </div>
                 ${isActive ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-pink text-white uppercase tracking-wider">Active</span>` : ''}
-                ${t.isDogsNZOnly ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-dogsnz-gold text-dogsnz-blue uppercase">Manual Audit</span>` : ''} </div>                <div> <span class="font-display text-3xl font-extrabold text-brand-dark">$${t.price}</span>
+                ${t.isDogsNZOnly ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-dogsnz-gold text-dogsnz-blue uppercase">Manual Audit</span>` : ''}
+              </div>
+
+              <div>
+                <span class="font-display text-3xl font-extrabold text-brand-dark">$${t.price}</span>
                 <span class="text-xs text-slate-400 font-bold"> NZD / mo</span>
                 ${t.annualPrice ? `<span class="block text-[10px] text-emerald-600 font-bold">or $${t.annualPrice}/yr (Save 20%)</span>` : ''}
               </div>
@@ -2342,65 +2662,35 @@
       window.appData.currentUser.tier = newTierName;
       window.updateAuthUI();
       window.renderSubscriptionTiers();
-      window.showToast(`Updated subscription tier to ${newTierName}!`, 'fa-id-card-clip'); };  // KENNEL SETTINGS window.saveSettings = async function() { window.appData.settings.kennelName = document.getElementById('setting-kennel-name').value; window.appData.settings.regNumber = document.getElementById('setting-reg-number').value; window.appData.settings.breeds = document.getElementById('setting-breeds').value; window.appData.settings.location = document.getElementById('setting-location').value; window.appData.settings.bio = document.getElementById('setting-bio').value;  window.saveData(); window.updateAuthUI(); window.showToast("Kennel profile settings saved!"); };  window.saveAutoResponder = function() { const userTier = window.appData.currentUser ? window.appData.currentUser.tier : ''; if (!userTier.includes('Premier') && !userTier.includes('Gold')) { alert("The Automated Inquiry Sales Funnel is reserved for Premier / Gold Platinum tier accounts."); return; } window.appData.settings.autoReplyEnabled = document.getElementById('auto-reply-enabled').checked; window.appData.settings.autoReplyMessage = document.getElementById('auto-reply-text').value; window.saveData(); window.showToast("Sales funnel auto-responder updated!"); };  // RENDER DETAIL VIEW WITH PEDIGREE & MILESTONES window.viewListingDetail = function(litterId) { let litter = window.appData.litters.find(l => l.id === litterId) \vert{}\vert{} window.publicMarketplaceLitters.find(l => l.id === litterId); if (!litter) return;  const gallery = (litter.gallery && litter.gallery.length) ? litter.gallery : ['https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'];  document.getElementById('detail-main-img').src = gallery[0]; document.getElementById('detail-title').innerText = litter.name; document.getElementById('detail-breeder').innerText = litter.breederName \vert{}\vert{} "Verified NZ Breeder"; document.getElementById('detail-location').innerText = litter.location \vert{}\vert{} "Waikato, New Zealand"; document.getElementById('detail-price').innerText = `$${(litter.price || 3500).toLocaleString()} NZD`;
-      document.getElementById('detail-desc').innerText = litter.description;
+      window.showToast(`Updated subscription tier to ${newTierName}!`, 'fa-id-card-clip');
+    };
 
-      // Badges
-      const badgeBox = document.getElementById('detail-badge-container');
-      badgeBox.innerHTML = `
-        <span class="px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-brand-accent">
-          <i class="fa-solid fa-shield-dog mr-1"></i> Verified Breeder Listing
-        </span>
-        ${litter.isDogsNZ ? `
-          <span class="px-3 py-1 rounded-full text-xs font-bold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold shadow-sm">
-            <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix (${litter.dogsNZPrefix || 'Registered'})
-          </span>
-        ` : ''}
-      `;
+    // KENNEL SETTINGS
+    window.saveSettings = async function() {
+      window.appData.settings.kennelName = document.getElementById('setting-kennel-name').value;
+      window.appData.settings.regNumber = document.getElementById('setting-reg-number').value;
+      window.appData.settings.breeds = document.getElementById('setting-breeds').value;
+      window.appData.settings.location = document.getElementById('setting-location').value;
+      window.appData.settings.bio = document.getElementById('setting-bio').value;
 
-      // 3-Generation Pedigree Tree Render
-      const pedigreeBox = document.getElementById('detail-pedigree-tree');
-      const p = litter.pedigree || {
-        sire: "Sire: Ch. Purebred Sire (Dogs NZ)",
-        dam: "Dam: Registered Dam (Dogs NZ)",
-        sireSire: "Gr. Ch. Paternal Grand Sire",
-        sireDam: "Paternal Grand Dam",
-        damSire: "Maternal Grand Sire",
-        damDam: "Maternal Grand Dam"
-      };
+      window.saveData();
+      window.updateAuthUI();
+      window.showToast("Kennel profile settings saved!");
+    };
 
-      pedigreeBox.innerHTML = `
-        <div class="grid grid-cols-3 gap-2 min-w-[500px]">
-          <div class="space-y-2">
-            <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200">
-              <span class="text-[9px] uppercase font-bold text-blue-700 block">Sire (Father)</span>
-              <strong>${p.sire}</strong>
-            </div>
-            <div class="p-2.5 rounded-xl bg-pink-50 border border-pink-200">
-              <span class="text-[9px] uppercase font-bold text-brand-pink block">Dam (Mother)</span>
-              <strong>${p.dam}</strong>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
-              <span class="text-[9px] text-slate-500 block">Paternal Grand Sire</span>
-              <span>${p.sireSire}</span>
-            </div>
-            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
-              <span class="text-[9px] text-slate-500 block">Paternal Grand Dam</span>
-              <span>${p.sireDam}</span>
-            </div>
-            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
-              <span class="text-[9px] text-slate-500 block">Maternal Grand Sire</span>
-              <span>${p.damSire}</span>
-            </div>
-            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
-              <span class="text-[9px] text-slate-500 block">Maternal Grand Dam</span>
-              <span>${p.damDam}</span>
-            </div>
-          </div>
-          <div class="flex items-center justify-center p-3 rounded-xl bg-white border border-slate-200 text-center">
-            <div>
-              <i class="fa-solid fa-dna text-brand-pink text-xl mb-1"></i>
-              <p class="font-bold text-[11px] text-slate-800">Pedigree Kinship</p>
-              <span class="text-[10px] text-emerald-
+    window.saveAutoResponder = function() {
+      const userTier = window.appData.currentUser ? window.appData.currentUser.tier : '';
+      if (!userTier.includes('Premier') && !userTier.includes('Gold')) {
+        alert("The Automated Inquiry Sales Funnel is reserved for Premier / Gold Platinum tier accounts.");
+        return;
+      }
+      window.appData.settings.autoReplyEnabled = document.getElementById('auto-reply-enabled').checked;
+      window.appData.settings.autoReplyMessage = document.getElementById('auto-reply-text').value;
+      window.saveData();
+      window.showToast("Sales funnel auto-responder updated!");
+    };
+
+    // RENDER DETAIL VIEW WITH PEDIGREE & MILESTONES
+    window.viewListingDetail = function(litterId) {
+      let litter = window.appData.litters.find(l => l.id === litterId) || window.publicMarketplaceLitters.find(l => l.id === litterId);
+      if (!litter) return;
