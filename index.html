@@ -2234,7 +2234,7 @@
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
           const uploaded = await uploadImageFile(fileInput.files[0], 'litters');
-          if (uploaded) photo = uploaded;
+          if (uploaded) photo = uploaded;  
         }
 
         if (!photo && editId) {
@@ -2809,7 +2809,26 @@
         status: document.getElementById('puppy-status').value,
         photo: photo
       };
-
+      try {
+        if (litter && window.supabaseClient && window.appData.currentUser) {
+          const { data, error } = await window.supabaseClient.from('puppies').insert({
+            litter_id: litterId,
+            owner_id: window.appData.currentUser.id,
+            collar: puppyPayload.identifier,
+            gender: puppyPayload.gender,
+            color: puppyPayload.color,
+            microchip: puppyPayload.chip,
+            price: puppyPayload.price,
+            status: puppyPayload.status,
+            photo: puppyPayload.photo
+          }).select().single();
+          if (error) throw new Error(error.message);
+          puppyPayload.id = data.id;
+        }
+      } catch (err) {
+        alert("Puppy save error: " + err.message);
+        return;
+      }
       if (litter) {
         if (!litter.puppies) litter.puppies = [];
         litter.puppies.push(puppyPayload);
