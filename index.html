@@ -1980,11 +1980,21 @@
       window.openModal('modal-dog-form');
     };
 
-    window.deleteDog = function(dogId) {
-      if (confirm("Delete this dog profile?")) {
+      window.deleteDog = async function(dogId) {
+      if (!confirm("Delete this dog profile?")) return;
+      try {
+        if (window.supabaseClient && !String(dogId).startsWith('dog-')) {
+          const { data, error } = await window.supabaseClient.from('dogs').delete().eq('id', dogId).select();
+          if (error) throw new Error(error.message);
+          if (!data || data.length === 0) {
+            throw new Error("Cloud delete blocked. Check the Supabase DELETE policy.");
+          }
+        }
         window.appData.dogs = window.appData.dogs.filter(d => d.id !== dogId);
         window.saveData();
         window.showToast("Dog deleted.");
+      } catch (err) {
+        alert("Delete error: " + err.message);
       }
     };
 
@@ -2024,22 +2034,26 @@
         };
 
         if (editId) {
-          const dog = window.appData.dogs.find(d => d.id === editId);
-          if (dog) Object.assign(dog, payload);
+  if (window.supabaseClient && !editId.startsWith('dog-')) {
+    const { data, error } = await window.supabaseClient.from('dogs').update({
+      name: payload.name,
+      call_name: payload.call_name,
+      role: payload.role,
+      breed: payload.breed,
+      dob: payload.dob,
+      photo: payload.photo,
+      health: payload.health,
+      pedigree_sire: payload.pedigreeSire,
+      pedigree_dam: payload.pedigreeDam
+    }).eq('id', editId).select();
 
-          if (window.supabaseClient && !editId.startsWith('dog-')) {
-            await window.supabaseClient.from('dogs').update({
-              name: payload.name,
-              call_name: payload.call_name,
-              role: payload.role,
-              breed: payload.breed,
-              dob: payload.dob,
-              photo: payload.photo,
-              health: payload.health,
-              pedigree_sire: payload.pedigreeSire,
-              pedigree_dam: payload.pedigreeDam
-            }).eq('id', editId);
-          }
+    if (error) throw new Error(error.message);
+    if (!data || data.length === 0) {
+      throw new Error("Cloud save blocked (0 rows updated). Check the Supabase UPDATE policy.");
+    }
+  }
+  const dog = window.appData.dogs.find(d => d.id === editId);
+  if (dog) Object.assign(dog, payload);
         } else {
           let assignedId = 'dog-' + Date.now();
           if (window.supabaseClient && window.appData.currentUser) {
