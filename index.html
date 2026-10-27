@@ -178,7 +178,7 @@
       </section>
     </div>
 
-    <!-- ================= VIEW 2: DEDICATED LISTING DETAIL (SIMPLIFIED SIDE-BY-SIDE DESIGN) ================= -->
+    <!-- ================= VIEW 2: DEDICATED LISTING DETAIL ================= -->
     <div id="view-listing-detail" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 hidden">
       <button type="button" onclick="window.showPage('home')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center space-x-2">
         <i class="fa-solid fa-arrow-left"></i>
@@ -193,7 +193,8 @@
             <div id="detail-badge-container" class="flex flex-wrap gap-2 mb-2"></div>
             <h1 id="detail-title" class="font-display font-extrabold text-2xl sm:text-4xl text-brand-dark">Litter Name</h1>
             <p class="text-xs text-slate-500 mt-1">
-              <i class="fa-solid fa-location-dot text-brand-accent mr-1"></i> <span id="detail-location">Location</span> · Listed by <strong id="detail-breeder" class="text-brand-primary">Breeder</strong>
+              <i class="fa-solid fa-location-dot text-brand-accent mr-1"></i> <span id="detail-location">Location</span> · Listed by 
+              <strong id="detail-breeder" onclick="window.viewBreederProfile(window.activeBreederName)" class="text-brand-primary cursor-pointer hover:underline">Breeder</strong>
             </p>
           </div>
           <div class="text-left md:text-right">
@@ -202,25 +203,25 @@
           </div>
         </div>
 
-        <!-- HERO SECTION: Side-by-Side Large Gallery + Breeder Contact Profile Box -->
+        <!-- HERO SECTION: Gallery + Breeder Contact Profile Box -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          <!-- LEFT 2 COLS: Main Gallery with Puppy-Tagged Overlays -->
+          <!-- LEFT 2 COLS: Main Gallery -->
           <div class="lg:col-span-2 space-y-3">
             <div class="relative h-80 sm:h-[460px] rounded-3xl overflow-hidden bg-slate-100 shadow-inner group">
               <img id="detail-main-img" src="" class="w-full h-full object-cover transition duration-300">
               <span id="detail-main-img-tag" class="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-extrabold bg-brand-dark/80 backdrop-blur-md text-white border border-white/20 hidden"></span>
             </div>
-            <!-- Thumbnails Strip (Including Individual Puppies) -->
+            <!-- Thumbnails Strip -->
             <div id="detail-thumbnails-strip" class="flex space-x-3 overflow-x-auto pb-2 custom-scroll"></div>
           </div>
 
           <!-- RIGHT 1 COL: Breeder Profile Box + Direct Message Form -->
           <div class="bg-brand-light/70 border border-brand-border/80 rounded-3xl p-6 space-y-4 shadow-sm">
-            <div class="flex items-center space-x-3 pb-3 border-b border-brand-border/60">
-              <img id="detail-breeder-avatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow">
+            <div class="flex items-center space-x-3 pb-3 border-b border-brand-border/60 cursor-pointer group" onclick="window.viewBreederProfile(window.activeBreederName)">
+              <img id="detail-breeder-avatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow group-hover:scale-105 transition">
               <div>
-                <h3 id="detail-breeder-name" class="font-bold text-sm text-brand-dark">Highland Pedigrees NZ</h3>
+                <h3 id="detail-breeder-name" class="font-bold text-sm text-brand-dark group-hover:text-brand-pink transition">Highland Pedigrees NZ</h3>
                 <p id="detail-breeder-location" class="text-xs text-slate-500">Cambridge, Waikato</p>
                 <span id="detail-breeder-badge" class="inline-block mt-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-dogsnz-blue text-dogsnz-gold">Dogs NZ Verified</span>
               </div>
@@ -229,6 +230,11 @@
             <p id="detail-breeder-bio" class="text-xs text-slate-600 leading-relaxed italic">
               "Dedicated preservation breeders raising DNA-tested, socialized puppies inside our family home."
             </p>
+
+            <button type="button" onclick="window.viewBreederProfile(window.activeBreederName)" class="w-full py-2 rounded-xl border border-brand-primary/30 text-brand-primary hover:bg-brand-primary/10 text-xs font-bold transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-id-badge"></i>
+              <span>View Kennel Profile & Active Dogs</span>
+            </button>
 
             <div class="pt-2 border-t border-brand-border/60 space-y-2">
               <h4 class="font-bold text-xs uppercase tracking-wider text-brand-dark">Send Message to Breeder</h4>
@@ -245,7 +251,7 @@
           </div>
         </div>
 
-        <!-- CONDITIONAL SECTION: 3-Generation Pedigree (ONLY IF PROVIDED) -->
+        <!-- CONDITIONAL SECTION: 3-Generation Pedigree -->
         <div id="section-pedigree" class="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4 hidden">
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -257,7 +263,7 @@
           <div id="detail-pedigree-tree" class="overflow-x-auto text-xs"></div>
         </div>
 
-        <!-- CONDITIONAL SECTION: Health Clearances (ONLY IF PROVIDED) -->
+        <!-- CONDITIONAL SECTION: Health Clearances -->
         <div id="section-health-clearances" class="bg-brand-light/60 border border-brand-border/70 rounded-3xl p-6 space-y-4 hidden">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
@@ -281,6 +287,54 @@
           <div id="detail-puppies-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ================= VIEW: PUBLIC BREEDER PROFILE (CLICKED FROM LISTINGS) ================= -->
+    <div id="view-breeder-profile" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 hidden">
+      <button type="button" onclick="window.showPage('home')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center space-x-2">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to Marketplace</span>
+      </button>
+
+      <!-- Breeder Header Banner -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/60 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="flex items-center space-x-5">
+          <img id="bp-avatar" src="" class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover border-4 border-white shadow-md">
+          <div class="space-y-1">
+            <div id="bp-badges" class="flex flex-wrap gap-2"></div>
+            <h1 id="bp-name" class="font-display font-extrabold text-2xl sm:text-3xl text-brand-dark">Kennel Name</h1>
+            <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot text-brand-accent mr-1"></i> <span id="bp-location">Location</span> · Breeds: <strong id="bp-breeds" class="text-brand-primary">Breeds</strong></p>
+          </div>
+        </div>
+        <button type="button" onclick="window.showPage('buyer-approval')" class="px-5 py-3 rounded-2xl gradient-accent text-white font-bold text-xs shadow-md hover:opacity-95 transition flex items-center space-x-2">
+          <i class="fa-solid fa-shield-cat"></i>
+          <span>Apply to Waitlist</span>
+        </button>
+      </div>
+
+      <!-- Bio / About -->
+      <div class="bg-white rounded-3xl p-6 border border-brand-border/60 shadow-sm space-y-2">
+        <h3 class="font-display font-bold text-base text-brand-dark">About Our Kennel & Ethics</h3>
+        <p id="bp-bio" class="text-xs text-slate-600 leading-relaxed"></p>
+      </div>
+
+      <!-- Breeding Stock Roster -->
+      <div class="space-y-3">
+        <h3 class="font-display font-bold text-lg text-brand-dark">Breeding Dogs Roster</h3>
+        <div id="bp-dogs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Active Litters -->
+      <div class="space-y-3">
+        <h3 class="font-display font-bold text-lg text-brand-dark">Current Available Litters</h3>
+        <div id="bp-litters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Upcoming Planned Breedings -->
+      <div class="space-y-3">
+        <h3 class="font-display font-bold text-lg text-brand-dark">Upcoming Breeding Plans</h3>
+        <div id="bp-plans-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </div>
 
@@ -419,9 +473,8 @@
         <!-- Main Workspace View Panels -->
         <main id="breeder-content-area" class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
 
-          <!-- ================= COMPACT HIGH-UTILITY DASHBOARD ================= -->
+          <!-- COMPACT HIGH-UTILITY DASHBOARD -->
           <section id="mod-dash" class="space-y-6">
-            <!-- Header bar -->
             <div class="gradient-plum rounded-3xl p-6 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold uppercase tracking-wider text-pink-200 inline-block mb-1">Breeder Control Center</span>
@@ -460,7 +513,7 @@
             <!-- ROW 2: Live Published Litters Showcase + Upcoming Heats Tracker -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              <!-- 2 COLS: Live Published Litters Mini-Reel -->
+              <!-- Live Published Litters Mini-Reel -->
               <div class="lg:col-span-2 bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3">
                 <div class="flex justify-between items-center">
                   <h3 class="font-display font-bold text-sm text-brand-dark flex items-center space-x-2">
@@ -472,7 +525,7 @@
                 <div id="dash-live-litters-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
               </div>
 
-              <!-- 1 COL: Upcoming Heat Cycles -->
+              <!-- Upcoming Heat Cycles -->
               <div class="bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3">
                 <div class="flex justify-between items-center">
                   <h3 class="font-display font-bold text-sm text-brand-dark flex items-center space-x-2">
@@ -1235,7 +1288,6 @@
 
   <!-- ================= JAVASCRIPT APPLICATION LOGIC ENGINE ================= -->
   <script>
-    // Supabase Initialization
     window.supabaseClient = null;
     try {
       if (window.supabase && typeof window.supabase.createClient === 'function') {
@@ -1251,7 +1303,7 @@
     const BUCKET_NAME = 'dog-photos';
     const STORAGE_KEY_PREFIX = 'wellbred_nz_user_';
     let currentActiveChatContact = null;
-    let activeListingBreederEmail = null;
+    window.activeBreederName = "Highland Pedigrees NZ";
 
     // Toast Notification helper
     window.showToast = function(msg, icon = 'fa-circle-check') {
@@ -1544,6 +1596,7 @@
     window.showPage = function(pageId) {
       document.getElementById('view-public-home').classList.add('hidden');
       document.getElementById('view-listing-detail').classList.add('hidden');
+      document.getElementById('view-breeder-profile').classList.add('hidden');
       document.getElementById('view-public-directory').classList.add('hidden');
       document.getElementById('view-public-apply').classList.add('hidden');
       document.getElementById('view-breeder-suite').classList.add('hidden');
@@ -1700,14 +1753,13 @@
       }
     };
 
-    // ================= NEW: SIMPLIFIED LISTING DETAIL WITH BREEDER PROFILE BOX & WORKING MESSAGING =================
+    // ================= LISTING DETAIL WITH BREEDER PROFILE BOX & WORKING MESSAGING =================
     window.viewListingDetail = function(litterId) {
       let litter = window.appData.litters.find(l => l.id === litterId) || window.publicMarketplaceLitters.find(l => l.id === litterId);
       if (!litter) return;
 
-      activeListingBreederEmail = litter.breederEmail || "highland@wellbred.co.nz";
+      window.activeBreederName = litter.breederName || "Highland Pedigrees NZ";
 
-      // Setup images list (Cover + All individual puppy photos)
       const allPhotos = [];
       if (litter.gallery && litter.gallery.length) {
         allPhotos.push({ url: litter.gallery[0], tag: "Litter Cover" });
@@ -1720,10 +1772,8 @@
         allPhotos.push({ url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80', tag: "Litter Photo" });
       }
 
-      // Main image display
       window.setActiveListingPhoto(allPhotos[0].url, allPhotos[0].tag);
 
-      // Render Thumbnails with Puppy Badges
       const thumbStrip = document.getElementById('detail-thumbnails-strip');
       thumbStrip.innerHTML = allPhotos.map((item, idx) => `
         <div onclick="window.setActiveListingPhoto('${item.url}', '${item.tag}', '${item.puppyId || ''}')" class="relative flex-shrink-0 cursor-pointer group">
@@ -1732,13 +1782,11 @@
         </div>
       `).join('');
 
-      // Titles & General Info
       document.getElementById('detail-title').innerText = litter.name;
       document.getElementById('detail-breeder').innerText = litter.breederName || "Verified Breeder";
       document.getElementById('detail-location').innerText = litter.location || "Waikato, New Zealand";
       document.getElementById('detail-price').innerText = `$${(litter.price || 3500).toLocaleString()} NZD`;
 
-      // Badges
       const badgeBox = document.getElementById('detail-badge-container');
       badgeBox.innerHTML = `
         <span class="px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-brand-accent">
@@ -1751,14 +1799,12 @@
         ` : ''}
       `;
 
-      // Populate Breeder Card on the right
       document.getElementById('detail-breeder-name').innerText = litter.breederName || "Verified NZ Breeder";
       document.getElementById('detail-breeder-location').innerText = litter.location || "New Zealand";
       document.getElementById('detail-breeder-avatar').src = litter.breederAvatar || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80";
       document.getElementById('detail-breeder-bio').innerText = `"${litter.breederBio || 'Ethical preservation breeder following official health screening protocols.'}"`;
       document.getElementById('detail-breeder-badge').innerText = litter.isDogsNZ ? "Dogs NZ Certified Prefix" : "Verified Ethical Breeder";
 
-      // CONDITIONAL TOGGLE: 3-Generation Pedigree Lineage
       const pedSection = document.getElementById('section-pedigree');
       if (litter.pedigree && (litter.pedigree.sire || litter.pedigree.dam)) {
         pedSection.classList.remove('hidden');
@@ -1806,7 +1852,6 @@
         pedSection.classList.add('hidden');
       }
 
-      // CONDITIONAL TOGGLE: Health Testing Clearances
       const healthSection = document.getElementById('section-health-clearances');
       if (litter.healthStats && litter.healthStats.length > 0) {
         healthSection.classList.remove('hidden');
@@ -1821,7 +1866,6 @@
         healthSection.classList.add('hidden');
       }
 
-      // Render Individual Puppies Cards with Click-to-Inspect
       const puppyContainer = document.getElementById('detail-puppies-list');
       puppyContainer.innerHTML = (litter.puppies || []).map(p => `
         <div id="puppy-card-${p.id}" class="flex items-center justify-between p-4 bg-brand-light/50 rounded-2xl border border-brand-border/60 transition duration-300">
@@ -1854,7 +1898,6 @@
         tagEl.innerText = tag;
         tagEl.classList.remove('hidden');
       }
-      // Highlight puppy card if clicked
       if (puppyId) {
         document.querySelectorAll('[id^="puppy-card-"]').forEach(el => el.classList.remove('ring-2', 'ring-brand-pink', 'bg-pink-50'));
         const activeCard = document.getElementById('puppy-card-' + puppyId);
@@ -1865,7 +1908,80 @@
       }
     };
 
-    // WORKING DIRECT BREEDER MESSAGING FORM
+    // ================= PUBLIC BREEDER PROFILE RENDERER =================
+    window.viewBreederProfile = function(breederName) {
+      const allLitters = [...window.publicMarketplaceLitters, ...window.appData.litters];
+      const breederLitters = allLitters.filter(l => l.breederName === breederName);
+      const isCurrent = window.appData.settings.kennelName === breederName;
+
+      const name = breederName;
+      const location = isCurrent ? window.appData.settings.location : (breederLitters[0]?.location || "New Zealand");
+      const breeds = isCurrent ? window.appData.settings.breeds : (breederLitters[0]?.breed || "Pedigree Breeds");
+      const bio = isCurrent ? window.appData.settings.bio : (breederLitters[0]?.breederBio || "Ethical registered preservation breeder.");
+      const avatar = isCurrent ? window.appData.settings.avatar : (breederLitters[0]?.breederAvatar || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80");
+      const isDogsNZ = isCurrent ? (window.appData.dogsNZCredentials?.status === 'approved') : (breederLitters[0]?.isDogsNZ);
+
+      document.getElementById('bp-avatar').src = avatar;
+      document.getElementById('bp-name').innerText = name;
+      document.getElementById('bp-location').innerText = location;
+      document.getElementById('bp-breeds').innerText = breeds;
+      document.getElementById('bp-bio').innerText = bio;
+
+      document.getElementById('bp-badges').innerHTML = `
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-brand-accent">Verified Breeder</span>
+        ${isDogsNZ ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold"><i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix</span>' : ''}
+      `;
+
+      const dogs = isCurrent ? window.appData.dogs : [
+        { callName: "Baron", name: "Ch. Silver Baron NZ", role: "Sire", breed: breeds, photo: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=300&q=80", health: "DNA Clear / OFA Hips Good" },
+        { callName: "Sierra", name: "Highland Sweet Sierra", role: "Dam", breed: breeds, photo: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80", health: "Full Genetic Panel Clear" }
+      ];
+
+      document.getElementById('bp-dogs-grid').innerHTML = dogs.map(d => `
+        <div class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm flex items-center space-x-3">
+          <img src="${d.photo}" class="w-16 h-16 rounded-xl object-cover">
+          <div>
+            <h4 class="font-bold text-xs text-brand-dark">${d.callName} (${d.role})</h4>
+            <p class="text-[11px] text-slate-500">${d.name}</p>
+            <span class="text-[9px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block mt-1">${d.health || 'Health Cleared'}</span>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('bp-litters-grid').innerHTML = breederLitters.length ? breederLitters.map(l => `
+        <div onclick="window.viewListingDetail('${l.id}')" class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition">
+          <img src="${l.gallery?.[0] || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'}" class="w-16 h-16 rounded-xl object-cover">
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-xs text-brand-dark truncate">${l.name}</h4>
+            <p class="text-[11px] text-slate-500">$${l.price} NZD · Ready: ${l.readyDate || 'Soon'}</p>
+            <span class="text-[9px] font-bold text-brand-pink hover:underline mt-1 block">View Available Puppies →</span>
+          </div>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-400 py-2">No active litters at this time.</p>';
+
+      const plans = isCurrent ? window.appData.heatLogs : [
+        { damName: "Sierra", estWhelp: "2026-12-05", breed: breeds }
+      ];
+
+      document.getElementById('bp-plans-grid').innerHTML = plans.length ? plans.map(p => `
+        <div class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-[9px] font-bold uppercase text-brand-accent tracking-wider">Planned Mating</span>
+            <h4 class="font-bold text-xs text-brand-dark mt-0.5">${p.damName} (${breeds})</h4>
+            <p class="text-[11px] text-slate-500">Expected Whelp: <strong>${p.estWhelp || 'Summer 2026'}</strong></p>
+          </div>
+          <button onclick="window.showPage('buyer-approval')" class="px-3 py-1.5 rounded-xl bg-brand-light text-brand-primary text-xs font-bold hover:bg-brand-pink/20 transition">Join Waitlist</button>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-400 py-2">No upcoming breedings scheduled.</p>';
+
+      document.getElementById('view-public-home').classList.add('hidden');
+      document.getElementById('view-listing-detail').classList.add('hidden');
+      document.getElementById('view-breeder-suite').classList.add('hidden');
+      document.getElementById('view-breeder-profile').classList.remove('hidden');
+      window.scrollTo(0, 0);
+    };
+
+    // DIRECT BREEDER MESSAGING FORM
     window.handleDirectBreederMessage = function(e) {
       e.preventDefault();
       const name = document.getElementById('direct-msg-name').value.trim();
@@ -1887,7 +2003,6 @@
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
 
-      // Breeder Notification
       window.appData.notifications.unshift({
         id: 'n-' + Date.now(),
         type: 'inquiry',
@@ -1897,7 +2012,6 @@
         read: false
       });
 
-      // Also register on waitlist inquiries
       window.appData.buyers.unshift({
         id: 'b-' + Date.now(),
         name: name,
@@ -1908,7 +2022,6 @@
         date: new Date().toLocaleDateString()
       });
 
-      // Auto reply check
       if (window.appData.settings.autoReplyEnabled) {
         conv.messages.push({
           sender: 'me',
@@ -1922,7 +2035,7 @@
       window.showToast("Message sent directly to the breeder!", "fa-paper-plane");
     };
 
-    // ================= LITTER MANAGEMENT IN BREEDER SUITE (EDIT, PUBLISH/UNPUBLISH, DELETE) =================
+    // LITTER MANAGEMENT (EDIT, PUBLISH/UNPUBLISH, DELETE)
     window.openAddLitterModal = function() {
       document.getElementById('form-litter').reset();
       document.getElementById('litter-edit-id').value = '';
@@ -2002,7 +2115,7 @@
           isDogsNZ: isDNZ,
           dogsNZPrefix: isDNZ ? window.appData.dogsNZCredentials.prefix : '',
           description: document.getElementById('litter-desc').value,
-          owner_id: window.appData.currentUser.id,
+          owner_id: window.appData.currentUser ? window.appData.currentUser.id : 'guest',
           gallery: [photo]
         };
 
@@ -2034,9 +2147,8 @@
       }
     };
 
-    // ================= DASHBOARD EXTRA FEATURES: TASKS & MASS BROADCAST =================
+    // DASHBOARD RENDERING: TASKS & MASS BROADCAST
     window.renderDashboardDetails = function() {
-      // 1. Live Litters Reel
       const liveGrid = document.getElementById('dash-live-litters-grid');
       const activeLitters = window.appData.litters.filter(l => l.isPublished);
 
@@ -2053,7 +2165,6 @@
         `).join('') : `<p class="col-span-full text-xs text-slate-400 py-4 text-center">No live published litters. Click 'Log Litter' above.</p>`;
       }
 
-      // 2. Upcoming Heats List
       const heatsList = document.getElementById('dash-heats-list');
       if (heatsList) {
         heatsList.innerHTML = window.appData.heatLogs.length ? window.appData.heatLogs.map(h => `
@@ -2067,7 +2178,6 @@
         `).join('') : `<p class="text-xs text-slate-400 py-4 text-center">No active heat cycles logged.</p>`;
       }
 
-      // 3. Task List
       window.renderTasks();
     };
 
@@ -2121,7 +2231,6 @@
     window.handleMassWaitlistBroadcast = function(e) {
       e.preventDefault();
       const subject = document.getElementById('mass-broadcast-subject').value.trim();
-      const body = document.getElementById('mass-broadcast-body').value.trim();
       const count = window.appData.buyers.length;
 
       if (!count) {
@@ -2129,7 +2238,6 @@
         return;
       }
 
-      // Add to notifications
       window.appData.notifications.unshift({
         id: 'n-' + Date.now(),
         type: 'broadcast',
@@ -2160,7 +2268,7 @@
       document.getElementById('stat-total-puppies').innerText = `${totalPups} Puppies`;
       document.getElementById('stat-waitlist-count').innerText = window.appData.buyers.length;
 
-      // Render Litters List in Breeder Suite (WITH FULL EDITING & PUBLISH CONTROLS)
+      // Render Litters List in Breeder Suite
       const littersList = document.getElementById('litters-list');
       if (littersList) {
         littersList.innerHTML = myLitters.map(l => `
@@ -2188,7 +2296,6 @@
               </div>
             </div>
 
-            <!-- Puppies Roster inside Litter -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               ${(l.puppies || []).map(p => `
                 <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center space-x-3">
