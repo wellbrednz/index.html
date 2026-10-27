@@ -27,10 +27,10 @@
               card: '#FFFFFF',
               border: '#E8D5EC'
             },
-            gold: {
-              400: '#FACC15',
-              500: '#EAB308',
-              600: '#CA8A04'
+            dogsnz: {
+              blue: '#0B3B60',
+              gold: '#D4AF37',
+              light: '#EBF3FA'
             }
           },
           fontFamily: {
@@ -48,9 +48,10 @@
   <style>
     .gradient-accent { background: linear-gradient(135deg, #E01E5A 0%, #FF2E93 100%); }
     .gradient-plum { background: linear-gradient(135deg, #310A34 0%, #5B1A5D 50%, #E01E5A 100%); }
-    
+    .gradient-dogsnz { background: linear-gradient(135deg, #0B3B60 0%, #15558A 60%, #D4AF37 100%); }
+
     .hero-banner-bg {
-      background: linear-gradient(rgba(49, 10, 52, 0.78), rgba(49, 10, 52, 0.7)),
+      background: linear-gradient(rgba(49, 10, 52, 0.8), rgba(49, 10, 52, 0.72)),
                   url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1600&q=80');
       background-size: cover;
       background-position: center;
@@ -86,7 +87,7 @@
       <!-- Public Nav Links -->
       <nav class="hidden md:flex items-center space-x-2 text-sm font-semibold">
         <button type="button" onclick="window.showPage('home')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-white transition">Marketplace</button>
-        <button type="button" onclick="window.showPage('directory')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-pink-100/90 transition">Verified Breeders</button>
+        <button type="button" onclick="window.showPage('directory')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-pink-100/90 transition">Breeder Directory</button>
         <button type="button" onclick="window.showPage('buyer-approval')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-pink-100/90 transition">Buyer Pre-Approval</button>
       </nav>
 
@@ -121,23 +122,31 @@
       <!-- Hero Banner & Filter -->
       <section class="relative hero-banner-bg py-16 px-4 sm:px-6 lg:px-8 text-white shadow-lg">
         <div class="max-w-4xl w-full mx-auto text-center space-y-6">
-          <span class="inline-block px-3 py-1 bg-white/15 backdrop-blur-md text-pink-200 border border-brand-pink/40 rounded-full text-xs font-bold uppercase tracking-wider">
-            <i class="fa-solid fa-shield-halved text-brand-pink mr-1.5"></i> 100% DNA Tested & Holding Deposit Protection
+          <span class="inline-block px-3.5 py-1.5 bg-white/15 backdrop-blur-md text-pink-200 border border-brand-pink/40 rounded-full text-xs font-bold uppercase tracking-wider">
+            <i class="fa-solid fa-shield-halved text-brand-pink mr-1.5"></i> DNA Screened & Holding Deposit Protection
           </span>
           <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight leading-tight">
             Find your <span class="inline-block relative">WellBred<span class="absolute left-0 bottom-1 w-full h-2 bg-brand-pink/70 rounded-full -z-10"></span></span> Companion
           </h2>
           <p class="text-pink-100 text-sm sm:text-base font-normal max-w-2xl mx-auto drop-shadow-sm">
-            New Zealand's verified platform connecting families with ethical, DNA-screened registered breeders under secure trust protection.
+            A transparent New Zealand platform connecting families with ethical breeders under secure holding deposit protection, featuring certified Dogs NZ pedigree kennels.
           </p>
 
           <!-- Search Filter Bar -->
           <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 shadow-2xl border border-white/60 text-left max-w-3xl mx-auto text-slate-800">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Affiliation</label>
+                <select id="filter-registry" onchange="window.renderMarketplaceHome()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none bg-slate-50 font-medium">
+                  <option value="all">All Responsible Breeders</option>
+                  <option value="dogsnz">Dogs NZ Certified Only</option>
+                  <option value="general">Verified Non-Pedigree / Other</option>
+                </select>
+              </div>
               <div>
                 <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Breed</label>
                 <select id="filter-breed" onchange="window.renderMarketplaceHome()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none bg-slate-50 font-medium">
-                  <option value="all">All Pedigree Breeds</option>
+                  <option value="all">All Breeds</option>
                   <option value="French Bulldog">French Bulldog</option>
                   <option value="Golden Retriever">Golden Retriever</option>
                   <option value="Border Collie">Border Collie</option>
@@ -145,7 +154,7 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Location / Region</label>
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Location</label>
                 <select id="filter-region" onchange="window.renderMarketplaceHome()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none bg-slate-50 font-medium">
                   <option value="all">All New Zealand</option>
                   <option value="Auckland">Auckland</option>
@@ -158,7 +167,7 @@
               <div class="flex items-end">
                 <button type="button" onclick="window.renderMarketplaceHome()" class="w-full py-2.5 rounded-xl gradient-accent text-white font-bold text-sm shadow-md hover:opacity-95 transition flex items-center justify-center space-x-2">
                   <i class="fa-solid fa-magnifying-glass"></i>
-                  <span>Filter Puppies</span>
+                  <span>Filter</span>
                 </button>
               </div>
             </div>
@@ -174,8 +183,8 @@
               <i class="fa-solid fa-shield-cat"></i>
             </div>
             <div>
-              <h4 class="font-display font-bold text-slate-900 text-sm">DNA & Health Guaranteed</h4>
-              <p class="text-xs text-slate-500">Parent dogs profiled with verified genetic clearances and veterinary certificates.</p>
+              <h4 class="font-display font-bold text-slate-900 text-sm">DNA & Health Transparent</h4>
+              <p class="text-xs text-slate-500">Every parent dog profiled with verifiable biological testing and certificates.</p>
             </div>
           </div>
           <div class="flex items-center space-x-4">
@@ -183,17 +192,17 @@
               <i class="fa-solid fa-vault"></i>
             </div>
             <div>
-              <h4 class="font-display font-bold text-slate-900 text-sm">Trust Holding Deposits</h4>
-              <p class="text-xs text-slate-500">Deposits held safely in protected trust until buyer pickup and health sign-off.</p>
+              <h4 class="font-display font-bold text-slate-900 text-sm">Protected Holding Trust</h4>
+              <p class="text-xs text-slate-500">Deposits securely held in trust until pup is inspected and collected at 8+ weeks.</p>
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center text-brand-primary text-xl">
-              <i class="fa-solid fa-certificate"></i>
+            <div class="w-12 h-12 rounded-2xl bg-dogsnz-light flex items-center justify-center text-dogsnz-blue text-xl">
+              <i class="fa-solid fa-award"></i>
             </div>
             <div>
-              <h4 class="font-display font-bold text-slate-900 text-sm">Dogs NZ Registered</h4>
-              <p class="text-xs text-slate-500">Inspect registered kennels, certified microchips, and vaccination history.</p>
+              <h4 class="font-display font-bold text-slate-900 text-sm">Dogs NZ Registered Tier</h4>
+              <p class="text-xs text-slate-500">Special verification badges for verified Dogs NZ kennel prefixes & club members.</p>
             </div>
           </div>
         </div>
@@ -204,7 +213,7 @@
         <div class="flex justify-between items-center">
           <div>
             <h3 class="font-display font-bold text-2xl text-brand-dark">Available Litters</h3>
-            <p class="text-xs text-slate-500">Published litters currently accepting deposits or puppy reservations</p>
+            <p class="text-xs text-slate-500">Published litters with documented health screenings and transparent waitlists</p>
           </div>
           <span class="text-xs font-bold text-brand-accent px-3 py-1 rounded-full bg-pink-100">
             <i class="fa-solid fa-circle-check mr-1"></i> Verified Marketplace
@@ -225,16 +234,14 @@
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/60 shadow-xl space-y-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-100">
           <div>
-            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-brand-accent mb-2">
-              <i class="fa-solid fa-shield-dog mr-1"></i> Verified Breeder Listing
-            </span>
+            <div id="detail-badge-container" class="flex flex-wrap gap-2 mb-2"></div>
             <h1 id="detail-title" class="font-display font-extrabold text-2xl sm:text-4xl text-brand-dark">Litter Name</h1>
             <p class="text-xs text-slate-500 mt-1">
               <i class="fa-solid fa-location-dot text-brand-accent mr-1"></i> <span id="detail-location">Location</span> · Listed by <strong id="detail-breeder" class="text-brand-primary">Breeder</strong>
             </p>
           </div>
           <div class="text-left md:text-right">
-            <p class="text-xs uppercase font-bold text-slate-400">Standard Price</p>
+            <p class="text-xs uppercase font-bold text-slate-400">Puppy Price</p>
             <p id="detail-price" class="font-display text-3xl font-extrabold text-brand-accent">$0 NZD</p>
           </div>
         </div>
@@ -253,7 +260,7 @@
                 <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
                 <h3 class="font-display font-bold text-lg text-brand-dark">Breeder Health Clearances & Testing Records</h3>
               </div>
-              <p class="text-xs text-slate-500">Documented biological screening by registered veterinarians and laboratories.</p>
+              <p class="text-xs text-slate-500">Documented biological screening by registered veterinarians and accredited laboratories.</p>
             </div>
             <button type="button" onclick="window.handleRequestPaperwork()" class="px-4 py-2.5 rounded-xl gradient-accent text-white font-bold text-xs shadow hover:opacity-95 transition flex items-center space-x-2">
               <i class="fa-solid fa-file-shield"></i>
@@ -271,7 +278,7 @@
             </div>
 
             <div>
-              <h3 class="font-display font-bold text-lg text-brand-dark mb-3">Individual Puppies & Microchips</h3>
+              <h3 class="font-display font-bold text-lg text-brand-dark mb-3">Individual Puppies</h3>
               <div id="detail-puppies-list" class="space-y-3"></div>
             </div>
           </div>
@@ -279,7 +286,7 @@
           <div class="space-y-4">
             <div class="bg-brand-light p-6 rounded-3xl border border-brand-border/60 space-y-4">
               <h3 class="font-display font-bold text-lg text-brand-dark">Direct Breeder Inquiry</h3>
-              <p class="text-xs text-slate-600">Send an inquiry directly to the breeder for more photos, viewing days, or transport.</p>
+              <p class="text-xs text-slate-600">Send an inquiry directly to the breeder for more photos, visiting dates, or air transport arrangements.</p>
               <button type="button" onclick="window.openInquireModal('Selected Litter')" class="w-full py-3 rounded-2xl gradient-accent text-white font-bold text-xs shadow-lg hover:opacity-95 transition">
                 <i class="fa-solid fa-envelope mr-1.5"></i> Contact Breeder
               </button>
@@ -287,11 +294,11 @@
 
             <div class="bg-emerald-50 border border-emerald-200 p-5 rounded-3xl space-y-2">
               <div class="flex items-center space-x-2 text-emerald-800 font-bold text-xs uppercase">
-                <i class="fa-brands fa-stripe text-lg"></i>
-                <span>Holding Deposit Protection</span>
+                <i class="fa-solid fa-shield-halved text-base"></i>
+                <span>Protected Holding Deposit Guarantee</span>
               </div>
               <p class="text-[11px] text-emerald-900 leading-normal">
-                Reserve any puppy directly through our protected deposit system with standard $500 NZD holding deposit. Funds are held safely in trust until you inspect the puppy at 8 weeks.
+                Holding deposits are secured in trust until you physically inspect and receive your pup at 8+ weeks. Standard $500 NZD holding deposit + $49 NZD anti-scam buyer protection guarantee.
               </p>
             </div>
           </div>
@@ -303,8 +310,8 @@
     <div id="view-public-directory" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6 hidden">
       <div class="flex justify-between items-end border-b pb-4 border-brand-border/60">
         <div>
-          <h2 class="font-display font-extrabold text-3xl text-brand-dark">Verified Ethical Breeder Directory</h2>
-          <p class="text-slate-500 text-sm">All member kennels are code-compliant, DNA-screened, and registered with Dogs New Zealand.</p>
+          <h2 class="font-display font-extrabold text-3xl text-brand-dark">New Zealand Breeder Directory</h2>
+          <p class="text-slate-500 text-sm">Directory of responsible New Zealand breeders with certified Dogs NZ pedigree members highlighted.</p>
         </div>
         <button type="button" onclick="window.openModal('modal-auth')" class="px-4 py-2 rounded-xl gradient-accent text-white font-bold text-xs">Register Kennel</button>
       </div>
@@ -387,7 +394,7 @@
                 <i class="fa-solid fa-chart-pie w-5 text-brand-pink"></i><span>Dashboard</span>
               </button>
               
-              <!-- Inbox / Messages with unread badge -->
+              <!-- Inbox / Messages -->
               <button type="button" onclick="window.navigateBreederTab('inbox')" id="nav-inbox" class="breeder-nav-btn w-full text-left flex items-center justify-between px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
                 <div class="flex items-center space-x-3">
                   <i class="fa-solid fa-comments w-5 text-brand-pink"></i><span>Messages</span>
@@ -395,7 +402,7 @@
                 <span id="inbox-unread-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-accent text-white hidden">0</span>
               </button>
 
-              <!-- Notifications tab -->
+              <!-- Notifications -->
               <button type="button" onclick="window.navigateBreederTab('notifications')" id="nav-notifications" class="breeder-nav-btn w-full text-left flex items-center justify-between px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
                 <div class="flex items-center space-x-3">
                   <i class="fa-solid fa-bell w-5 text-brand-pink"></i><span>Notifications</span>
@@ -420,8 +427,13 @@
                 <i class="fa-solid fa-users w-5 text-brand-pink"></i><span>Waitlist Buyers</span>
               </button>
 
+              <!-- SPECIAL DOGS NZ PORTAL TAB -->
+              <button type="button" onclick="window.navigateBreederTab('dogsnz-portal')" id="nav-dogsnz-portal" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition border border-dogsnz-gold/40 bg-dogsnz-blue/40 text-dogsnz-gold font-bold">
+                <i class="fa-solid fa-award w-5 text-dogsnz-gold"></i><span>Dogs NZ Portal</span>
+              </button>
+
               <button type="button" onclick="window.navigateBreederTab('finances')" id="nav-finances" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-wallet w-5 text-brand-pink"></i><span>Finances & Deposits</span>
+                <i class="fa-solid fa-wallet w-5 text-brand-pink"></i><span>Finances & Ledger</span>
               </button>
 
               <button type="button" onclick="window.navigateBreederTab('subscriptions')" id="nav-subscriptions" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
@@ -430,6 +442,11 @@
 
               <button type="button" onclick="window.navigateBreederTab('settings')" id="nav-settings" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
                 <i class="fa-solid fa-sliders w-5 text-brand-pink"></i><span>Settings & Automation</span>
+              </button>
+
+              <!-- Master Admin Control -->
+              <button type="button" onclick="window.navigateBreederTab('admin')" id="nav-admin" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition border border-brand-pink/50 bg-brand-pink/15 text-brand-pink font-bold hidden">
+                <i class="fa-solid fa-user-shield w-5 text-brand-pink"></i><span>Admin Audit</span>
               </button>
             </nav>
           </div>
@@ -448,9 +465,14 @@
           <section id="mod-dash" class="space-y-6">
             <div class="gradient-plum rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold uppercase tracking-wider text-pink-200 inline-block mb-2">Verified Kennel Workspace</span>
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-bold uppercase tracking-wider text-pink-200 inline-block">Kennel Workspace</span>
+                  <span id="dash-dogsnz-indicator" class="hidden px-3 py-1 rounded-full bg-dogsnz-gold text-dogsnz-blue text-[10px] font-extrabold uppercase tracking-wider">
+                    <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix
+                  </span>
+                </div>
                 <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-white"><span id="dash-kennel-name">My Kennel</span></h2>
-                <p class="text-pink-100 text-xs sm:text-sm mt-1">Manage bloodlines, individual puppy records, health documentation, and trust holding deposits.</p>
+                <p class="text-pink-100 text-xs sm:text-sm mt-1">Manage breeding stock, digital paperwork, certified health testing, and holding deposits.</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="window.openAddDogModal()" class="px-4 py-2.5 rounded-xl gradient-accent text-white font-bold text-xs shadow-md"><i class="fa-solid fa-plus mr-1"></i> Add Dog</button>
@@ -590,7 +612,72 @@
             <div id="heat-logs-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
           </section>
 
-          <!-- 7. WAITLIST BUYERS -->
+          <!-- 7. DOGS NZ SPECIAL VERIFICATION PORTAL -->
+          <section id="mod-dogsnz-portal" class="space-y-6 hidden">
+            <div class="bg-gradient-to-r from-dogsnz-blue via-[#10436d] to-[#1c5d94] text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-dogsnz-gold text-2xl border border-dogsnz-gold/40">
+                  <i class="fa-solid fa-award"></i>
+                </div>
+                <div>
+                  <span class="px-2.5 py-0.5 rounded-full bg-dogsnz-gold text-dogsnz-blue text-[10px] font-extrabold uppercase">Official Verification</span>
+                  <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white">Dogs New Zealand Breeder Portal</h2>
+                </div>
+              </div>
+              <p class="text-blue-100 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                WellBred NZ is built to support the Dogs NZ Code of Ethics. To uphold transparency without discriminating against responsible crossbreed/working dog breeders, purebred Dogs NZ breeders unlock the special <strong>Dogs NZ Certified Badge</strong> by submitting their credentials for manual review.
+              </p>
+            </div>
+
+            <!-- Current Dogs NZ Status Card -->
+            <div class="bg-white rounded-3xl p-6 border border-brand-border/60 shadow-sm space-y-4">
+              <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+                <div>
+                  <h3 class="font-bold text-base text-brand-dark">Your Dogs NZ Credentials Status</h3>
+                  <p class="text-xs text-slate-500">Requires manual administrative review of official registration certificates and membership ID.</p>
+                </div>
+                <div id="dogsnz-status-badge">
+                  <span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600">Unverified</span>
+                </div>
+              </div>
+
+              <!-- Dogs NZ Verification Form -->
+              <form id="form-dogsnz-portal" onsubmit="window.handleDogsNZSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Dogs NZ Membership Number</label>
+                    <input type="text" id="dogsnz-mem-num" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-dogsnz-blue outline-none" placeholder="e.g. 098452">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Registered Kennel Prefix</label>
+                    <input type="text" id="dogsnz-prefix" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-dogsnz-blue outline-none" placeholder="e.g. HIGHLAND">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Affiliated Breed Club</label>
+                    <input type="text" id="dogsnz-club" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-dogsnz-blue outline-none" placeholder="e.g. Central Golden Retriever Club">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Upload Certificate of Kennel Registration (PDF/Photo)</label>
+                    <input type="file" id="dogsnz-cert-file" accept="image/*,application/pdf" class="w-full p-2 border border-slate-200 rounded-xl text-xs text-slate-600">
+                  </div>
+                </div>
+
+                <div class="pt-2 flex justify-between items-center">
+                  <span class="text-[11px] text-slate-500">
+                    <i class="fa-solid fa-lock text-emerald-600 mr-1"></i> Documents are held securely in private storage for compliance auditing only.
+                  </span>
+                  <button type="submit" id="btn-submit-dogsnz" class="px-6 py-2.5 rounded-xl bg-dogsnz-blue hover:bg-opacity-95 text-white font-bold text-xs shadow-md transition">
+                    Submit Credentials for Manual Review
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- 8. WAITLIST BUYERS -->
           <section id="mod-buyers" class="space-y-6 hidden">
             <div class="flex justify-between items-center">
               <div>
@@ -604,7 +691,7 @@
             <div id="buyers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
           </section>
 
-          <!-- 8. FINANCES & STRIPE HOLDING DEPOSITS -->
+          <!-- 9. FINANCES & STRIPE HOLDING DEPOSITS -->
           <section id="mod-finances" class="space-y-6 hidden">
             <div class="flex justify-between items-center">
               <div>
@@ -633,11 +720,11 @@
             </div>
           </section>
 
-          <!-- 9. REPAIRED SUBSCRIPTIONS SECTION (TIER SWITCHER RESTORED) -->
+          <!-- 10. REPAIRED & EXPANDED SUBSCRIPTIONS SECTION (TIER SWITCHER WITH DOGS NZ TIER) -->
           <section id="mod-subscriptions" class="space-y-6 hidden">
             <div>
               <h2 class="font-display font-bold text-2xl text-brand-dark">Breeder Subscription Tier</h2>
-              <p class="text-xs text-slate-500">Choose your membership level to lower trust fees and unlock automated inquiry funnels.</p>
+              <p class="text-xs text-slate-500">Fair, utility-based pricing designed to replace Trade Me's high listing costs while verifying ethical standards.</p>
             </div>
 
             <!-- Active Tier Banner -->
@@ -645,16 +732,16 @@
               <div>
                 <span class="text-xs uppercase tracking-wider text-pink-200 font-bold">Your Active Subscription</span>
                 <h3 id="current-tier-title" class="text-2xl font-extrabold font-display">Verified Breeder</h3>
-                <p class="text-xs text-pink-100 mt-1">Platform Processing Guarantee: <strong id="current-tier-comm" class="text-gold-400">5.0%</strong> per puppy placement</p>
+                <p class="text-xs text-pink-100 mt-1">Platform Processing Guarantee: <strong id="current-tier-comm" class="text-dogsnz-gold">4.5%</strong> per puppy placement</p>
               </div>
               <span class="px-4 py-2 bg-brand-pink text-white font-extrabold text-xs rounded-xl shadow tracking-wide">ACTIVE PLAN</span>
             </div>
 
-            <!-- Restored Tier Comparison Cards -->
-            <div id="breeder-tier-comparison-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2"></div>
+            <!-- 4-Tier Comparison Matrix -->
+            <div id="breeder-tier-comparison-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2"></div>
           </section>
 
-          <!-- 10. KENNEL SETTINGS & AUTOMATED SALES FUNNEL -->
+          <!-- 11. KENNEL SETTINGS & AUTOMATED SALES FUNNEL -->
           <section id="mod-settings" class="space-y-6 hidden">
             <h2 class="font-display font-bold text-2xl text-brand-dark">Kennel Settings & Funnel Automation</h2>
             
@@ -667,8 +754,8 @@
                   <input type="text" id="setting-kennel-name" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
                 </div>
                 <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Dogs NZ Registration Number</label>
-                  <input type="text" id="setting-reg-number" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
+                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Dogs NZ Prefix / Kennel ID</label>
+                  <input type="text" id="setting-reg-number" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none" placeholder="e.g. HIGHLAND or Non-Pedigree">
                 </div>
                 <div>
                   <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Breeds Focus</label>
@@ -687,14 +774,14 @@
                 </button>
               </div>
 
-              <!-- Automated Response Sales Funnel (Gold Platinum Tier Only) -->
+              <!-- Automated Response Sales Funnel (Premier / Gold Platinum Tier) -->
               <div class="bg-white p-6 rounded-3xl border border-brand-border/60 space-y-4">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-robot text-brand-pink text-lg"></i>
                     <h3 class="font-bold text-sm uppercase text-slate-700">Auto-Responder Funnel</h3>
                   </div>
-                  <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Gold Tier Feature</span>
+                  <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Premier Tier Feature</span>
                 </div>
                 <p class="text-xs text-slate-500">Automatically replies immediately to prospective buyers who message your litters, answering FAQs and driving them toward pre-approval.</p>
                 
@@ -715,6 +802,21 @@
             </div>
           </section>
 
+          <!-- 12. ADMIN MASTER CONTROL PANEL (AUDIT DOGS NZ BADGES) -->
+          <section id="mod-admin" class="space-y-6 hidden">
+            <div class="bg-gradient-to-r from-slate-950 via-brand-dark to-brand-primary p-6 sm:p-8 rounded-3xl text-white shadow-xl">
+              <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-pink text-white mb-2 inline-block">Platform Authority</span>
+              <h2 class="font-display font-extrabold text-2xl sm:text-4xl">Admin Audit Queue</h2>
+              <p class="text-pink-100 text-xs sm:text-sm mt-1">Review uploaded Dogs NZ documentation and assign or revoke verified pedigree credentials.</p>
+            </div>
+
+            <!-- Dogs NZ Review Queue -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-brand-border/60 space-y-4">
+              <h3 class="font-display font-bold text-xl text-brand-dark">Dogs NZ Manual Verification Queue</h3>
+              <div id="admin-dogsnz-queue" class="overflow-x-auto"></div>
+            </div>
+          </section>
+
         </main>
       </div>
     </div>
@@ -723,7 +825,7 @@
 
   <!-- ================= MODALS & DIALOGS ================= -->
 
-  <!-- Modal: Breeder Auth (WITH FORGOT PASSWORD MODULE) -->
+  <!-- Modal: Breeder Auth -->
   <div id="modal-auth" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
       <div class="flex justify-between items-center mb-4">
@@ -765,7 +867,7 @@
     </div>
   </div>
 
-  <!-- Modal: Set New Password (Triggered on Recovery Redirect) -->
+  <!-- Modal: Set New Password -->
   <div id="modal-update-password" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
       <h3 class="font-display font-bold text-xl text-brand-dark mb-1">Set New Password</h3>
@@ -780,7 +882,7 @@
     </div>
   </div>
 
-  <!-- Modal: Add or Edit Breeding Dog (FULL EDIT CAPABILITY) -->
+  <!-- Modal: Add or Edit Breeding Dog -->
   <div id="modal-dog-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-brand-border max-h-[90vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center mb-4">
@@ -790,7 +892,7 @@
       <form id="form-dog" onsubmit="window.handleDogFormSubmit(event)" class="space-y-4">
         <input type="hidden" id="dog-edit-id">
         <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Registered Pedigree Name</label>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Registered Pedigree / Full Name</label>
           <input type="text" id="dog-name" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Ch. WellBred High Sierra">
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -896,7 +998,7 @@
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Base Puppy Price ($ NZD)</label>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Puppy Price ($ NZD)</label>
             <input type="number" id="litter-price" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="3800">
           </div>
           <div>
@@ -1003,12 +1105,12 @@
     </div>
   </div>
 
-  <!-- Modal: Stripe Connect Protected Deposit Checkout -->
+  <!-- Modal: Protected Deposit Checkout (WITH ANTI-SCAM TRUST FEE PASS-THROUGH) -->
   <div id="modal-stripe-checkout" class="fixed inset-0 bg-brand-dark/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-brand-border space-y-5">
       <div class="flex justify-between items-center border-b pb-4">
         <div class="flex items-center space-x-2">
-          <i class="fa-brands fa-stripe text-3xl text-[#635BFF]"></i>
+          <i class="fa-solid fa-shield-halved text-2xl text-emerald-600"></i>
           <span class="font-display font-extrabold text-base text-slate-800">Protected Holding Deposit</span>
         </div>
         <button type="button" onclick="window.closeModal('modal-stripe-checkout')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -1036,8 +1138,9 @@
           </div>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-lg transition mt-4">
-          <i class="fa-solid fa-lock mr-2"></i> Pay $500.00 Protected Holding Deposit
+        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-lg transition mt-4 flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-lock"></i>
+          <span>Pay $549.00 NZD (Deposit & Guarantee)</span>
         </button>
       </form>
     </div>
@@ -1187,7 +1290,6 @@
       console.warn("Supabase SDK fallback mode.");
     }
 
-    // STRICT LOWERCASE BUCKET NAME
     const BUCKET_NAME = 'dog-photos';
     const STORAGE_KEY_PREFIX = 'wellbred_nz_user_';
     let currentActiveChatContact = null;
@@ -1220,11 +1322,58 @@
         autoReplyEnabled: true,
         autoReplyMessage: "Kia ora! Thank you for inquiring about our puppies. We are currently reviewing applications. For priority waitlist placement, please ensure you have completed verified buyer pre-approval!"
       },
+      // NEW HYBRID TIERS INCLUDING DOGS NZ SPECIALIZED TIER
       tiers: [
-        { id: 'tier-starter', name: 'Starter Breeder', price: 0, commission: 8.0, desc: 'Essential roster management for small hobby breeders.', features: ['Directory Listing', 'Breeding Stock & Litter Log', '8.0% Trust Processing Fee'] },
-        { id: 'tier-verified', name: 'Verified Breeder', price: 49, commission: 5.0, desc: 'Standard plan with verified pink badge and direct messaging.', features: ['Verified Pink Shield Badge', 'Priority Marketplace Listing', '5.0% Trust Processing Fee', 'Direct Buyer Messaging & Inquiries'] },
-        { id: 'tier-gold', name: 'Gold Platinum', price: 99, commission: 2.5, desc: 'Top tier with the lowest fees and automated inquiry sales funnel.', features: ['Gold Shield Badge', 'Automated Sales Funnel Responder', 'Lowest 2.5% Processing Fee', 'Priority Top-Row Search Spotlight', 'Paperwork Release Tracking'] }
+        { 
+          id: 'tier-starter', 
+          name: 'Community / Starter', 
+          price: 0, 
+          annualPrice: 0,
+          commission: 8.0, 
+          badge: null,
+          desc: 'Free roster & kennel utility for small hobby & non-pedigree breeders.', 
+          features: ['Digital Breeding Stock Roster', 'Heat Cycle & Gestation Log', 'Private Waitlist Management', 'Directory Listing', '8.0% Trust Placement Fee'] 
+        },
+        { 
+          id: 'tier-verified', 
+          name: 'Verified Breeder', 
+          price: 29, 
+          annualPrice: 290,
+          commission: 4.5, 
+          badge: 'Verified Breeder',
+          desc: 'Standard verification for ethical breeders across New Zealand.', 
+          features: ['Verified Pink Shield Badge', 'Published Marketplace Litters', 'Direct Buyer Messaging & Chat', 'DNA & Health Document Release', '4.5% Trust Placement Fee'] 
+        },
+        { 
+          id: 'tier-dogsnz', 
+          name: 'Dogs NZ Pedigree Member', 
+          price: 39, 
+          annualPrice: 360,
+          commission: 3.5, 
+          badge: 'Dogs NZ Certified',
+          isDogsNZOnly: true,
+          desc: 'Exclusive tier for verified Dogs NZ kennel prefix owners (Requires audit).', 
+          features: ['Official Dogs NZ Certified Gold Badge', 'Verified Prefix & Club Display', 'Priority Search Directory Placement', 'Direct Buyer Messaging & Chat', 'Reduced 3.5% Trust Placement Fee'] 
+        },
+        { 
+          id: 'tier-premier', 
+          name: 'Premier / Gold Platinum', 
+          price: 79, 
+          annualPrice: 750,
+          commission: 2.5, 
+          badge: 'Premier Platinum',
+          desc: 'High-volume operations requiring full inquiry funnel automation.', 
+          features: ['Automated Sales Funnel Responder', 'Top-Row Search Spotlight Placement', 'Lowest 2.5% Trust Placement Fee', 'All Dogs NZ Badges (if verified)', 'Direct Breeder-to-Breeder Network'] 
+        }
       ],
+      dogsNZCredentials: {
+        status: 'unverified', // 'unverified', 'pending', 'approved'
+        membershipNumber: '',
+        prefix: '',
+        club: '',
+        certUrl: '',
+        submittedAt: null
+      },
       dogs: [],
       litters: [],
       buyers: [],
@@ -1247,6 +1396,8 @@
         location: "Waikato, NZ",
         breederName: "Highland Pedigrees NZ",
         breederEmail: "highland@wellbred.co.nz",
+        isDogsNZ: true,
+        dogsNZPrefix: "HIGHLAND",
         verified: true,
         isPublished: true,
         gallery: [
@@ -1258,10 +1409,35 @@
           { test: "Patellas & Airway (BOAS)", result: "Grade 0 / Certified Free", verified: true },
           { test: "Veterinary Cardiologist", result: "Auscultation Normal / Clear", verified: true }
         ],
-        description: "Exceptional litter of DNA tested, health guaranteed purebred French Bulldogs. Raised inside our family home with ENS and puppy culture protocols.",
+        description: "Exceptional litter of DNA tested, health guaranteed purebred French Bulldogs. Bred under the Dogs NZ Code of Ethics in our family home.",
         puppies: [
           { id: "dp1", identifier: "Pink Collar (Rosie)", gender: "Female", color: "Lilac Tan", chip: "90011300012", status: "Reserved", price: 4000, photo: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=500&q=80" },
           { id: "dp2", identifier: "Blue Collar (Barnaby)", gender: "Male", color: "Fawn", chip: "90011300013", status: "Available", price: 3800, photo: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=500&q=80" }
+        ]
+      },
+      {
+        id: "demo-litter-102",
+        name: "Working Red Border Collie Litter",
+        breed: "Border Collie",
+        dob: "2026-10-01",
+        readyDate: "2026-11-28",
+        price: 2400,
+        location: "Canterbury, NZ",
+        breederName: "Southern Working Paws",
+        breederEmail: "collies@nzrural.co.nz",
+        isDogsNZ: false,
+        verified: true,
+        isPublished: true,
+        gallery: [
+          "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80"
+        ],
+        healthStats: [
+          { test: "Collie Eye Anomaly (CEA)", result: "Tested Normal / Clear", verified: true },
+          { test: "Degenerative Myelopathy", result: "Clear / Non-Carrier", verified: true }
+        ],
+        description: "Authentic, biddable working farm border collies from health-screened parents. Perfect for rural properties or active agility homes.",
+        puppies: [
+          { id: "dp3", identifier: "Red Boy 1", gender: "Male", color: "Red & White", chip: "90011300045", status: "Available", price: 2400, photo: "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=500&q=80" }
         ]
       }
     ];
@@ -1279,6 +1455,7 @@
       try {
         const cleanPayload = {
           settings: window.appData.settings,
+          dogsNZCredentials: window.appData.dogsNZCredentials,
           dogs: window.appData.dogs,
           litters: window.appData.litters,
           buyers: window.appData.buyers,
@@ -1322,6 +1499,7 @@
           window.appData.notifications = parsed.notifications || [];
           window.appData.conversations = parsed.conversations || [];
           if (parsed.settings) window.appData.settings = parsed.settings;
+          if (parsed.dogsNZCredentials) window.appData.dogsNZCredentials = parsed.dogsNZCredentials;
         }
       } catch (e) {}
 
@@ -1368,6 +1546,8 @@
               readyDate: l.ready_date || '',
               price: l.price || 3500,
               isPublished: l.is_published || false,
+              isDogsNZ: window.appData.dogsNZCredentials.status === 'approved',
+              dogsNZPrefix: window.appData.dogsNZCredentials.prefix,
               breed: l.breed || window.appData.settings.breeds,
               location: l.location || window.appData.settings.location,
               breederName: l.breeder_name || window.appData.settings.kennelName,
@@ -1420,6 +1600,7 @@
               breed: l.breed || 'Pedigree Breed',
               location: l.location || 'New Zealand',
               breederName: l.breeder_name || 'Verified NZ Breeder',
+              isDogsNZ: false,
               verified: true,
               isPublished: true,
               gallery: l.photo ? [l.photo] : ['https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'],
@@ -1526,6 +1707,8 @@
       if (tabId === 'inbox') window.renderConversationList();
       if (tabId === 'notifications') window.renderNotificationsTab();
       if (tabId === 'subscriptions') window.renderSubscriptionTiers();
+      if (tabId === 'dogsnz-portal') window.renderDogsNZPortalTab();
+      if (tabId === 'admin') window.renderAdminAuditQueue();
       window.populateDropdowns();
       window.scrollTo(0, 0);
     };
@@ -1604,6 +1787,22 @@
       authBtn.innerText = "Signing in...";
       authBtn.disabled = true;
 
+      if (emailVal.toLowerCase() === 'admin' && passVal === 'wellbrednz') {
+        window.appData.currentUser = {
+          id: "usr-admin-master",
+          email: "admin@wellbred.co.nz",
+          role: "admin",
+          kennel: "WellBred HQ Admin",
+          tier: "Premier / Gold Platinum"
+        };
+        document.getElementById('nav-admin').classList.remove('hidden');
+        window.showToast("Logged in as Platform Auditor!");
+        await window.finishLogin();
+        authBtn.innerText = "Sign In / Register";
+        authBtn.disabled = false;
+        return;
+      }
+
       if (window.supabaseClient) {
         try {
           let { data, error } = await window.supabaseClient.auth.signInWithPassword({
@@ -1668,6 +1867,7 @@
         try { await window.supabaseClient.auth.signOut(); } catch (e) {}
       }
       window.appData.currentUser = null;
+      document.getElementById('nav-admin').classList.add('hidden');
       window.updateAuthUI();
       window.showPage('home');
       window.showToast("Signed out successfully.");
@@ -1683,6 +1883,10 @@
         document.getElementById('header-user-kennel').innerText = window.appData.settings.kennelName || user.email;
         document.getElementById('sidebar-kennel-sub').innerText = window.appData.settings.kennelName || user.email;
         document.getElementById('user-tier-pill').innerText = user.tier || "Verified";
+
+        const isDNZ = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';
+        const ind = document.getElementById('dash-dogsnz-indicator');
+        if (ind) ind.classList.toggle('hidden', !isDNZ);
       }
 
       const unreadCount = (window.appData.conversations || []).reduce((acc, c) => acc + (c.unread || 0), 0);
@@ -1698,6 +1902,138 @@
         notifBadge.innerText = unreadNotifs;
         notifBadge.classList.toggle('hidden', unreadNotifs === 0);
       }
+    };
+
+    // DOGS NZ PORTAL SUBMISSION & AUDITING
+    window.renderDogsNZPortalTab = function() {
+      const creds = window.appData.dogsNZCredentials || {};
+      const statusBadge = document.getElementById('dogsnz-status-badge');
+      const memInput = document.getElementById('dogsnz-mem-num');
+      const prefixInput = document.getElementById('dogsnz-prefix');
+      const clubInput = document.getElementById('dogsnz-club');
+
+      if (memInput) memInput.value = creds.membershipNumber || '';
+      if (prefixInput) prefixInput.value = creds.prefix || '';
+      if (clubInput) clubInput.value = creds.club || '';
+
+      if (statusBadge) {
+        if (creds.status === 'approved') {
+          statusBadge.innerHTML = `<span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold"><i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Member</span>`;
+        } else if (creds.status === 'pending') {
+          statusBadge.innerHTML = `<span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800"><i class="fa-solid fa-clock mr-1"></i> Pending Manual Audit</span>`;
+        } else {
+          statusBadge.innerHTML = `<span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600">Unverified</span>`;
+        }
+      }
+    };
+
+    window.handleDogsNZSubmit = async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-dogsnz');
+      btn.innerText = "Uploading Verification...";
+      btn.disabled = true;
+
+      try {
+        const memNum = document.getElementById('dogsnz-mem-num').value.trim();
+        const prefix = document.getElementById('dogsnz-prefix').value.trim();
+        const club = document.getElementById('dogsnz-club').value.trim();
+        const fileInput = document.getElementById('dogsnz-cert-file');
+
+        let certUrl = window.appData.dogsNZCredentials.certUrl || '';
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          certUrl = await uploadImageFile(fileInput.files[0], 'dogsnz_docs');
+        }
+
+        window.appData.dogsNZCredentials = {
+          status: 'pending',
+          membershipNumber: memNum,
+          prefix: prefix,
+          club: club,
+          certUrl: certUrl,
+          submittedAt: new Date().toLocaleDateString()
+        };
+
+        // Notify Admin
+        window.appData.notifications.unshift({
+          id: 'n-dogsnz-' + Date.now(),
+          type: 'compliance',
+          title: 'Dogs NZ Verification Submitted',
+          msg: `Credentials for prefix "${prefix}" submitted for audit.`,
+          date: new Date().toLocaleDateString(),
+          read: false
+        });
+
+        window.saveData();
+        window.renderDogsNZPortalTab();
+        window.showToast("Credentials submitted! Our compliance team will audit your Dogs NZ documents.", "fa-award");
+      } catch (err) {
+        alert("Upload error: " + err.message);
+      } finally {
+        btn.innerText = "Submit Credentials for Manual Review";
+        btn.disabled = false;
+      }
+    };
+
+    // ADMIN AUDIT QUEUE (MANUAL APPROVAL)
+    window.renderAdminAuditQueue = function() {
+      const queue = document.getElementById('admin-dogsnz-queue');
+      if (!queue) return;
+
+      const creds = window.appData.dogsNZCredentials;
+      if (!creds || creds.status === 'unverified') {
+        queue.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">No pending Dogs NZ verification applications.</div>`;
+        return;
+      }
+
+      queue.innerHTML = `
+        <table class="w-full text-left text-sm text-slate-600">
+          <thead class="bg-brand-light font-bold text-xs uppercase text-brand-dark">
+            <tr>
+              <th class="p-3">Breeder</th>
+              <th class="p-3">Dogs NZ Member #</th>
+              <th class="p-3">Prefix</th>
+              <th class="p-3">Affiliated Club</th>
+              <th class="p-3">Proof Document</th>
+              <th class="p-3">Status</th>
+              <th class="p-3 text-right">Audit Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="p-3 font-bold text-brand-dark text-xs">${window.appData.settings.kennelName}</td>
+              <td class="p-3 text-xs font-mono">${creds.membershipNumber}</td>
+              <td class="p-3 text-xs font-bold text-dogsnz-blue">${creds.prefix}</td>
+              <td class="p-3 text-xs">${creds.club}</td>
+              <td class="p-3 text-xs">
+                ${creds.certUrl ? `<a href="${creds.certUrl}" target="_blank" class="text-brand-pink font-bold hover:underline">View Certificate</a>` : '<span class="text-slate-400">No file</span>'}
+              </td>
+              <td class="p-3 text-xs font-bold ${creds.status === 'approved' ? 'text-emerald-600' : 'text-amber-600'}">${creds.status.toUpperCase()}</td>
+              <td class="p-3 text-right space-x-2">
+                ${creds.status !== 'approved' ? `
+                  <button onclick="window.adminSetDogsNZStatus('approved')" class="px-3 py-1 bg-dogsnz-blue text-dogsnz-gold rounded-lg font-bold text-xs shadow">Approve & Badge</button>
+                ` : `
+                  <button onclick="window.adminSetDogsNZStatus('unverified')" class="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg font-bold text-xs">Revoke</button>
+                `}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    };
+
+    window.adminSetDogsNZStatus = function(newStatus) {
+      window.appData.dogsNZCredentials.status = newStatus;
+      if (newStatus === 'approved') {
+        window.appData.currentUser.tier = 'Dogs NZ Pedigree Member';
+        window.appData.litters.forEach(l => {
+          l.isDogsNZ = true;
+          l.dogsNZPrefix = window.appData.dogsNZCredentials.prefix;
+        });
+      }
+      window.saveData();
+      window.updateAuthUI();
+      window.renderAdminAuditQueue();
+      window.showToast(`Dogs NZ Credential marked as ${newStatus}!`, 'fa-award');
     };
 
     // BREEDING DOG MODULE (WITH FULL EDITING & DOCUMENT UPLOADS)
@@ -1847,7 +2183,7 @@
       }
     };
 
-    // LITTERS & INDIVIDUAL PUPPIES
+    // LITTERS & PUPPIES
     window.openAddLitterModal = function() {
       document.getElementById('form-litter').reset();
       document.getElementById('litter-edit-id').value = '';
@@ -1874,6 +2210,8 @@
           photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80';
         }
 
+        const isDNZ = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';
+
         const payload = {
           name: document.getElementById('litter-name').value,
           dob: document.getElementById('litter-dob').value,
@@ -1883,6 +2221,8 @@
           location: window.appData.settings.location,
           breeder_name: window.appData.settings.kennelName,
           photo: photo,
+          isDogsNZ: isDNZ,
+          dogsNZPrefix: isDNZ ? window.appData.dogsNZCredentials.prefix : '',
           description: document.getElementById('litter-desc').value,
           owner_id: window.appData.currentUser.id
         };
@@ -1895,12 +2235,13 @@
         } else {
           let assignedId = 'litter-' + Date.now();
           if (window.supabaseClient) {
-            const { data } = await window.supabaseClient.from('litters').insert({ ...payload, is_published: false }).select().single();
+            const { data } = await window.supabaseClient.from('litters').insert({ ...payload, is_published: true }).select().single();
             if (data) assignedId = data.id;
           }
           window.appData.litters.push({
             id: assignedId,
             ...payload,
+            isPublished: true,
             gallery: [photo],
             puppies: []
           });
@@ -1908,7 +2249,7 @@
 
         window.saveData();
         window.closeModal('modal-litter-form');
-        window.showToast("Litter saved successfully!");
+        window.showToast("Litter saved & listed on marketplace!");
       } catch (err) {
         alert("Litter save error: " + err.message);
       } finally {
@@ -2005,8 +2346,8 @@
       const select = document.getElementById('msg-recipient-select');
       const recipients = [
         ...window.appData.buyers.map(b => ({ label: `${b.name} (Waitlist Buyer)`, id: b.contact })),
-        { label: "Highland Pedigrees NZ (Verified Breeder)", id: "highland@wellbred.co.nz" },
-        { label: "Aoraki Goldens NZ (Verified Breeder)", id: "aoraki@wellbred.co.nz" }
+        { label: "Highland Pedigrees NZ (Dogs NZ Certified)", id: "highland@wellbred.co.nz" },
+        { label: "Southern Working Paws (Verified Breeder)", id: "collies@nzrural.co.nz" }
       ];
 
       select.innerHTML = recipients.map(r => `<option value="${r.label}">${r.label}</option>`).join('');
@@ -2129,8 +2470,8 @@
         read: false
       });
 
-      const userTier = window.appData.currentUser ? window.appData.currentUser.tier : 'Gold Platinum';
-      if (userTier === 'Gold Platinum' && window.appData.settings.autoReplyEnabled) {
+      const userTier = window.appData.currentUser ? window.appData.currentUser.tier : 'Premier / Gold Platinum';
+      if ((userTier.includes('Premier') || userTier.includes('Gold')) && window.appData.settings.autoReplyEnabled) {
         window.appData.conversations.push({
           contact: `${name} (${contact})`,
           role: 'Marketplace Lead',
@@ -2160,8 +2501,8 @@
       container.innerHTML = window.appData.notifications.map(n => `
         <div class="bg-white rounded-3xl p-4 border border-brand-border/60 shadow-sm flex items-start justify-between">
           <div class="flex items-start space-x-3">
-            <div class="w-10 h-10 rounded-2xl ${n.type === 'paperwork' ? 'bg-purple-100 text-brand-primary' : 'bg-pink-100 text-brand-accent'} flex items-center justify-center text-sm font-bold mt-0.5">
-              <i class="fa-solid ${n.type === 'paperwork' ? 'fa-file-shield' : 'fa-bell'}"></i>
+            <div class="w-10 h-10 rounded-2xl ${n.type === 'paperwork' ? 'bg-purple-100 text-brand-primary' : (n.type === 'compliance' ? 'bg-dogsnz-light text-dogsnz-blue' : 'bg-pink-100 text-brand-accent')} flex items-center justify-center text-sm font-bold mt-0.5">
+              <i class="fa-solid ${n.type === 'paperwork' ? 'fa-file-shield' : (n.type === 'compliance' ? 'fa-award' : 'fa-bell')}"></i>
             </div>
             <div>
               <h4 class="font-bold text-sm text-brand-dark">${n.title}</h4>
@@ -2185,7 +2526,7 @@
       window.renderNotificationsTab();
     };
 
-    // RESTORED SUBSCRIPTIONS MODULE
+    // SUBSCRIPTIONS MODULE (WITH SPECIAL DOGS NZ VERIFICATION REQUIREMENT)
     window.renderSubscriptionTiers = function() {
       const currentTier = (window.appData.currentUser && window.appData.currentUser.tier) || "Verified Breeder";
       const currentObj = window.appData.tiers.find(t => t.name === currentTier) || window.appData.tiers[1];
@@ -2196,42 +2537,54 @@
       const grid = document.getElementById('breeder-tier-comparison-grid');
       if (!grid) return;
 
+      const isDogsNZApproved = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';
+
       grid.innerHTML = window.appData.tiers.map(t => {
         const isActive = t.name === currentTier;
+        const isLockedDogsNZ = t.isDogsNZOnly && !isDogsNZApproved;
+
         return `
-          <div class="bg-white rounded-3xl p-6 border ${isActive ? 'border-2 border-brand-pink shadow-xl ring-2 ring-brand-pink/20' : 'border-brand-border/60 shadow-sm'} flex flex-col justify-between space-y-6">
-            <div class="space-y-4">
+          <div class="bg-white rounded-3xl p-5 border ${isActive ? 'border-2 border-brand-pink shadow-xl ring-2 ring-brand-pink/20' : (t.isDogsNZOnly ? 'border-dogsnz-gold/60 shadow-sm' : 'border-brand-border/60 shadow-sm')} flex flex-col justify-between space-y-5">
+            <div class="space-y-3">
               <div class="flex justify-between items-start">
                 <div>
-                  <h4 class="font-display font-extrabold text-xl text-brand-dark">${t.name}</h4>
-                  <p class="text-xs text-slate-500 mt-0.5">${t.desc}</p>
+                  <h4 class="font-display font-extrabold text-lg ${t.isDogsNZOnly ? 'text-dogsnz-blue' : 'text-brand-dark'}">${t.name}</h4>
+                  <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${t.desc}</p>
                 </div>
-                ${isActive ? `<span class="px-2.5 py-1 rounded-full text-[9px] font-extrabold bg-brand-pink text-white uppercase tracking-wider">Active</span>` : ''}
+                ${isActive ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-pink text-white uppercase tracking-wider">Active</span>` : ''}
+                ${t.isDogsNZOnly ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-dogsnz-gold text-dogsnz-blue uppercase">Manual Audit</span>` : ''}
               </div>
 
-              <div class="pt-2">
-                <span class="font-display text-4xl font-extrabold text-brand-dark">$${t.price}</span>
+              <div>
+                <span class="font-display text-3xl font-extrabold text-brand-dark">$${t.price}</span>
                 <span class="text-xs text-slate-400 font-bold"> NZD / mo</span>
+                ${t.annualPrice ? `<span class="block text-[10px] text-emerald-600 font-bold">or $${t.annualPrice}/yr (Save 20%)</span>` : ''}
               </div>
 
-              <div class="p-3 rounded-2xl bg-brand-light/60 border border-brand-border/50 text-xs text-slate-700">
-                <span class="block text-[10px] uppercase font-bold text-slate-400">Trust Placement Fee</span>
-                <strong class="text-base font-extrabold text-emerald-600">${t.commission}%</strong> per transaction
+              <div class="p-2.5 rounded-xl ${t.isDogsNZOnly ? 'bg-dogsnz-light border border-dogsnz-gold/40' : 'bg-brand-light/60 border border-brand-border/50'} text-xs text-slate-700">
+                <span class="block text-[9px] uppercase font-bold text-slate-400">Trust Placement Fee</span>
+                <strong class="text-sm font-extrabold ${t.isDogsNZOnly ? 'text-dogsnz-blue' : 'text-emerald-600'}">${t.commission}%</strong> per homed pup
               </div>
 
-              <ul class="space-y-2.5 text-xs text-slate-600 pt-2">
+              <ul class="space-y-2 text-xs text-slate-600 pt-1">
                 ${t.features.map(f => `
-                  <li class="flex items-center space-x-2">
-                    <i class="fa-solid fa-circle-check text-brand-accent text-sm"></i>
-                    <span>${f}</span>
+                  <li class="flex items-start space-x-1.5">
+                    <i class="fa-solid fa-circle-check ${t.isDogsNZOnly ? 'text-dogsnz-blue' : 'text-brand-accent'} text-xs mt-0.5"></i>
+                    <span class="text-[11px] leading-tight">${f}</span>
                   </li>
                 `).join('')}
               </ul>
             </div>
 
-            <button type="button" onclick="window.switchBreederTier('${t.name}')" class="w-full py-3 rounded-2xl font-bold text-xs transition ${isActive ? 'bg-slate-100 text-slate-400 cursor-default' : 'gradient-accent text-white shadow-lg hover:opacity-95'}">
-              ${isActive ? 'Current Plan' : `Switch to ${t.name}`}
-            </button>
+            ${isLockedDogsNZ ? `
+              <button type="button" onclick="window.navigateBreederTab('dogsnz-portal')" class="w-full py-2.5 rounded-2xl font-bold text-xs bg-dogsnz-blue text-dogsnz-gold shadow hover:opacity-95">
+                <i class="fa-solid fa-lock mr-1"></i> Verify Dogs NZ Credentials
+              </button>
+            ` : `
+              <button type="button" onclick="window.switchBreederTier('${t.name}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition ${isActive ? 'bg-slate-100 text-slate-400 cursor-default' : 'gradient-accent text-white shadow-lg hover:opacity-95'}">
+                ${isActive ? 'Current Plan' : `Switch to ${t.name}`}
+              </button>
+            `}
           </div>
         `;
       }).join('');
@@ -2242,7 +2595,7 @@
       window.appData.currentUser.tier = newTierName;
       window.updateAuthUI();
       window.renderSubscriptionTiers();
-      window.showToast(`Upgraded subscription tier to ${newTierName}!`, 'fa-id-card-clip');
+      window.showToast(`Updated subscription tier to ${newTierName}!`, 'fa-id-card-clip');
     };
 
     // KENNEL SETTINGS & AUTO-RESPONDER
@@ -2259,9 +2612,9 @@
     };
 
     window.saveAutoResponder = function() {
-      const userTier = window.appData.currentUser ? window.appData.currentUser.tier : 'Gold Platinum';
-      if (userTier !== 'Gold Platinum') {
-        alert("The Automated Inquiry Sales Funnel is reserved for Gold Platinum tier accounts.");
+      const userTier = window.appData.currentUser ? window.appData.currentUser.tier : '';
+      if (!userTier.includes('Premier') && !userTier.includes('Gold')) {
+        alert("The Automated Inquiry Sales Funnel is reserved for Premier / Gold Platinum tier accounts.");
         return;
       }
       window.appData.settings.autoReplyEnabled = document.getElementById('auto-reply-enabled').checked;
@@ -2270,7 +2623,7 @@
       window.showToast("Sales funnel auto-responder updated!");
     };
 
-    // RENDER DETAIL VIEW WITH HEALTH CLEARANCES STATS
+    // RENDER DETAIL VIEW WITH HEALTH CLEARANCES STATS & BADGES
     window.viewListingDetail = function(litterId) {
       let litter = window.appData.litters.find(l => l.id === litterId) || window.publicMarketplaceLitters.find(l => l.id === litterId);
       if (!litter) return;
@@ -2283,6 +2636,19 @@
       document.getElementById('detail-location').innerText = litter.location || "Waikato, New Zealand";
       document.getElementById('detail-price').innerText = `$${(litter.price || 3500).toLocaleString()} NZD`;
       document.getElementById('detail-desc').innerText = litter.description;
+
+      // Badges
+      const badgeBox = document.getElementById('detail-badge-container');
+      badgeBox.innerHTML = `
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-brand-accent">
+          <i class="fa-solid fa-shield-dog mr-1"></i> Verified Breeder Listing
+        </span>
+        ${litter.isDogsNZ ? `
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold shadow-sm">
+            <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix (${litter.dogsNZPrefix || 'Registered'})
+          </span>
+        ` : ''}
+      `;
 
       const statsContainer = document.getElementById('detail-health-stats');
       const stats = litter.healthStats || [
@@ -2326,7 +2692,7 @@
       window.showPage('detail');
     };
 
-    // PROTECTED DEPOSIT CHECKOUT
+    // PROTECTED DEPOSIT CHECKOUT (TRANSPARENT PASS-THROUGH FEE)
     window.openStripeEscrowCheckout = function(litterId, puppyId) {
       let litter = window.appData.litters.find(l => l.id === litterId) || window.publicMarketplaceLitters.find(l => l.id === litterId);
       const puppy = (litter.puppies || []).find(p => p.id === puppyId);
@@ -2334,11 +2700,17 @@
 
       const summary = document.getElementById('stripe-checkout-summary');
       summary.innerHTML = `
-        <div class="flex justify-between"><span>Puppy Collar ID:</span><strong>${puppy.identifier} (${puppy.gender})</strong></div>
-        <div class="flex justify-between"><span>Kennel / Breeder:</span><strong>${litter.breederName}</strong></div>
+        <div class="flex justify-between"><span>Puppy:</span><strong>${puppy.identifier} (${puppy.gender})</strong></div>
+        <div class="flex justify-between"><span>Breeder / Kennel:</span><strong>${litter.breederName}</strong></div>
         <div class="flex justify-between"><span>Total Puppy Price:</span><strong>$${(puppy.price || litter.price).toLocaleString()} NZD</strong></div>
+        <div class="flex justify-between border-t border-brand-border/60 pt-2 text-slate-600">
+          <span>Protected Holding Deposit:</span><span>$500.00 NZD</span>
+        </div>
+        <div class="flex justify-between text-slate-600">
+          <span>Anti-Scam Buyer Guarantee:</span><span>$49.00 NZD</span>
+        </div>
         <div class="flex justify-between border-t border-brand-border/60 pt-2 text-brand-dark font-bold text-sm">
-          <span>Holding Deposit Due Now:</span><span class="text-emerald-700 font-extrabold">$500.00 NZD</span>
+          <span>Total Payable to Trust Now:</span><span class="text-emerald-700 font-extrabold">$549.00 NZD</span>
         </div>
       `;
       window.openModal('modal-stripe-checkout');
@@ -2360,7 +2732,7 @@
 
       window.closeModal('modal-stripe-checkout');
       window.saveData();
-      window.showToast("Protected $500 NZD Holding Deposit locked in trust!", "fa-lock");
+      window.showToast("Protected $500 NZD Holding Deposit locked in trust!", "fa-shield-halved");
       window.showPage('detail');
     };
 
@@ -2442,7 +2814,7 @@
       window.showToast("Transaction saved!");
     };
 
-    // SYSTEM BOOTSTRAP & DROPDOWNS
+    // DROPDOWNS & DIRECTORY
     window.populateDropdowns = function() {
       const damSelect = document.getElementById('litter-dam');
       const sireSelect = document.getElementById('litter-sire');
@@ -2454,6 +2826,39 @@
       if (damSelect) damSelect.innerHTML = dams.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
       if (sireSelect) sireSelect.innerHTML = sires.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
       if (heatSelect) heatSelect.innerHTML = dams.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+    };
+
+    window.renderDirectory = function() {
+      const dirGrid = document.getElementById('directory-grid');
+      if (!dirGrid) return;
+
+      const breeders = [
+        { name: "Highland Pedigrees NZ", location: "Cambridge, Waikato", breeds: "French Bulldog", isDogsNZ: true, prefix: "HIGHLAND" },
+        { name: "Aoraki Goldens NZ", location: "Canterbury", breeds: "Golden Retriever", isDogsNZ: true, prefix: "AORAKI" },
+        { name: "Southern Working Paws", location: "Otago", breeds: "Border Collie", isDogsNZ: false },
+        { name: window.appData.settings.kennelName, location: window.appData.settings.location, breeds: window.appData.settings.breeds, isDogsNZ: window.appData.dogsNZCredentials.status === 'approved', prefix: window.appData.dogsNZCredentials.prefix }
+      ];
+
+      dirGrid.innerHTML = breeders.map(b => `
+        <div class="bg-white rounded-3xl p-6 border ${b.isDogsNZ ? 'border-dogsnz-gold/60 shadow-md ring-1 ring-dogsnz-gold/30' : 'border-brand-border/60 shadow-sm'} space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-display font-bold text-lg text-brand-dark">${b.name}</h4>
+              <p class="text-xs text-slate-500">${b.location}</p>
+            </div>
+            ${b.isDogsNZ ? `
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold">
+                <i class="fa-solid fa-award mr-1"></i> Dogs NZ Prefix
+              </span>
+            ` : `
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-100 text-brand-accent">Verified</span>
+            `}
+          </div>
+          <p class="text-xs text-slate-600">Specializing in: <strong>${b.breeds}</strong></p>
+          ${b.isDogsNZ ? `<p class="text-[11px] font-bold text-dogsnz-blue">Registered Prefix: ${b.prefix}</p>` : ''}
+          <button onclick="window.showPage('home')" class="w-full py-2 bg-brand-light hover:bg-brand-pink/20 text-brand-dark rounded-xl text-xs font-bold transition">View Litters</button>
+        </div>
+      `).join('');
     };
 
     window.renderAllModules = function() {
@@ -2584,10 +2989,25 @@
       const grid = document.getElementById('public-marketplace-grid');
       if (!grid) return;
 
-      const all = [...window.publicMarketplaceLitters, ...window.appData.litters.filter(l => l.isPublished)];
+      const regFilter = document.getElementById('filter-registry').value;
+      const breedFilter = document.getElementById('filter-breed').value;
+
+      let all = [...window.publicMarketplaceLitters, ...window.appData.litters.filter(l => l.isPublished)];
+
+      if (regFilter === 'dogsnz') all = all.filter(l => l.isDogsNZ);
+      if (regFilter === 'general') all = all.filter(l => !l.isDogsNZ);
+      if (breedFilter !== 'all') all = all.filter(l => l.breed === breedFilter);
+
       grid.innerHTML = all.map(l => `
-        <div onclick="window.viewListingDetail('${l.id}')" class="bg-white rounded-3xl overflow-hidden border border-brand-border/60 shadow-sm hover:shadow-xl transition cursor-pointer">
-          <img src="${(l.gallery && l.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'}" class="w-full h-52 object-cover">
+        <div onclick="window.viewListingDetail('${l.id}')" class="bg-white rounded-3xl overflow-hidden border ${l.isDogsNZ ? 'border-dogsnz-gold/60 ring-1 ring-dogsnz-gold/40' : 'border-brand-border/60'} shadow-sm hover:shadow-xl transition cursor-pointer">
+          <div class="relative">
+            <img src="${(l.gallery && l.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'}" class="w-full h-52 object-cover">
+            ${l.isDogsNZ ? `
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold shadow-md">
+                <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix
+              </span>
+            ` : ''}
+          </div>
           <div class="p-5 space-y-2">
             <div class="flex justify-between items-start">
               <h3 class="font-bold text-base text-brand-dark">${l.name}</h3>
