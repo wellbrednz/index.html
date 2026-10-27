@@ -1374,6 +1374,7 @@
   </div>
 
   <!-- ================= JAVASCRIPT APPLICATION LOGIC ENGINE ================= -->
+
   <script>
     // Supabase Initialization
     window.supabaseClient = null;
@@ -2694,3 +2695,555 @@
     window.viewListingDetail = function(litterId) {
       let litter = window.appData.litters.find(l => l.id === litterId) || window.publicMarketplaceLitters.find(l => l.id === litterId);
       if (!litter) return;
+
+      const gallery = (litter.gallery && litter.gallery.length) ? litter.gallery : ['https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'];
+
+      document.getElementById('detail-main-img').src = gallery[0];
+      document.getElementById('detail-title').innerText = litter.name;
+      document.getElementById('detail-breeder').innerText = litter.breederName || "Verified NZ Breeder";
+      document.getElementById('detail-location').innerText = litter.location || "Waikato, New Zealand";
+      document.getElementById('detail-price').innerText = `$${(litter.price || 3500).toLocaleString()} NZD`;
+      document.getElementById('detail-desc').innerText = litter.description;
+
+      // Badges
+      const badgeBox = document.getElementById('detail-badge-container');
+      badgeBox.innerHTML = `
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-brand-accent">
+          <i class="fa-solid fa-shield-dog mr-1"></i> Verified Breeder Listing
+        </span>
+        ${litter.isDogsNZ ? `
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold shadow-sm">
+            <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix (${litter.dogsNZPrefix || 'Registered'})
+          </span>
+        ` : ''}
+      `;
+
+      // 3-Generation Pedigree Tree Render
+      const pedigreeBox = document.getElementById('detail-pedigree-tree');
+      const p = litter.pedigree || {
+        sire: "Sire: Ch. Purebred Sire (Dogs NZ)",
+        dam: "Dam: Registered Dam (Dogs NZ)",
+        sireSire: "Gr. Ch. Paternal Grand Sire",
+        sireDam: "Paternal Grand Dam",
+        damSire: "Maternal Grand Sire",
+        damDam: "Maternal Grand Dam"
+      };
+
+      pedigreeBox.innerHTML = `
+        <div class="grid grid-cols-3 gap-2 min-w-[500px]">
+          <div class="space-y-2">
+            <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200">
+              <span class="text-[9px] uppercase font-bold text-blue-700 block">Sire (Father)</span>
+              <strong>${p.sire}</strong>
+            </div>
+            <div class="p-2.5 rounded-xl bg-pink-50 border border-pink-200">
+              <span class="text-[9px] uppercase font-bold text-brand-pink block">Dam (Mother)</span>
+              <strong>${p.dam}</strong>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <span class="text-[9px] text-slate-500 block">Paternal Grand Sire</span>
+              <span>${p.sireSire}</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <span class="text-[9px] text-slate-500 block">Paternal Grand Dam</span>
+              <span>${p.sireDam}</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <span class="text-[9px] text-slate-500 block">Maternal Grand Sire</span>
+              <span>${p.damSire}</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <span class="text-[9px] text-slate-500 block">Maternal Grand Dam</span>
+              <span>${p.damDam}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-center p-3 rounded-xl bg-white border border-slate-200 text-center">
+            <div>
+              <i class="fa-solid fa-dna text-brand-pink text-xl mb-1"></i>
+              <p class="font-bold text-[11px] text-slate-800">Pedigree Kinship</p>
+              <span class="text-[10px] text-emerald-600 font-bold">COI: &lt; 2.5% (Ideal)</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Milestones Render
+      const milestonesBox = document.getElementById('detail-growth-milestones');
+      const miles = litter.milestones || [
+        { stage: "2-Week Milestone", notes: "Puppies opened eyes, strong steady weight gains." },
+        { stage: "6-Week Milestone", notes: "Veterinary inspection, vaccination and microchips scheduled." }
+      ];
+
+      milestonesBox.innerHTML = miles.map(m => `
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+          <div class="flex items-center space-x-1.5 font-bold text-brand-dark mb-1">
+            <i class="fa-solid fa-check-double text-emerald-600"></i>
+            <span>${m.stage}</span>
+          </div>
+          <p class="text-slate-600 text-[11px] leading-relaxed">${m.notes}</p>
+        </div>
+      `).join('');
+
+      // Health Stats Render
+      const statsContainer = document.getElementById('detail-health-stats');
+      const stats = litter.healthStats || [
+        { test: "Orivet DNA Panel", result: "100% Cleared", verified: true },
+        { test: "OFA Hips / Spine", result: "Clear / Scored", verified: true },
+        { test: "Patellas & Airway", result: "Grade 0 / Certified Free", verified: true },
+        { test: "Cardiologist Exam", result: "Normal Auscultation", verified: true }
+      ];
+
+      statsContainer.innerHTML = stats.map(s => `
+        <div class="bg-white p-3 rounded-2xl border border-brand-border/60 shadow-sm">
+          <span class="text-[10px] font-bold uppercase text-slate-400 block">${s.test}</span>
+          <p class="font-extrabold text-xs text-brand-dark mt-0.5">${s.result}</p>
+          <span class="inline-block mt-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1"></i> Tested</span>
+        </div>
+      `).join('');
+
+      // Puppies Render
+      const puppyTable = document.getElementById('detail-puppies-list');
+      const puppies = litter.puppies || [];
+
+      puppyTable.innerHTML = puppies.map(p => `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-brand-light/50 rounded-2xl border border-brand-border/60 gap-3">
+          <div class="flex items-center space-x-3">
+            <img src="${p.photo || gallery[0]}" class="w-14 h-14 rounded-xl object-cover border border-brand-border">
+            <div>
+              <p class="font-bold text-brand-dark text-sm">${p.identifier} (${p.gender})</p>
+              <p class="text-xs text-slate-500">${p.color} · Microchip: ${p.chip || 'Pending 6-week vet check'}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+            <p class="text-xs font-bold text-brand-primary">$${(p.price || litter.price).toLocaleString()} NZD</p>
+            ${p.status === 'Available' ? `
+              <button type="button" onclick="window.openStripeEscrowCheckout('${litter.id}', '${p.id}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow">
+                Reserve ($500 Deposit)
+              </button>
+            ` : `<span class="px-3 py-1 bg-slate-200 text-slate-500 font-bold text-xs rounded-xl">Reserved</span>`}
+          </div>
+        </div>
+      `).join('');
+
+      window.showPage('detail');
+    };
+
+    // PROTECTED DEPOSIT CHECKOUT
+    window.openStripeEscrowCheckout = function(litterId, puppyId) {
+      let litter = window.appData.litters.find(l => l.id === litterId) || window.publicMarketplaceLitters.find(l => l.id === litterId);
+      const puppy = (litter.puppies || []).find(p => p.id === puppyId);
+      window.appData.selectedReservePuppy = { litter, puppy };
+
+      const summary = document.getElementById('stripe-checkout-summary');
+      summary.innerHTML = `
+        <div class="flex justify-between"><span>Puppy:</span><strong>${puppy.identifier} (${puppy.gender})</strong></div>
+        <div class="flex justify-between"><span>Breeder / Kennel:</span><strong>${litter.breederName}</strong></div>
+        <div class="flex justify-between"><span>Total Puppy Price:</span><strong>$${(puppy.price || litter.price).toLocaleString()} NZD</strong></div>
+        <div class="flex justify-between border-t border-brand-border/60 pt-2 text-slate-600">
+          <span>Protected Holding Deposit:</span><span>$500.00 NZD</span>
+        </div>
+        <div class="flex justify-between text-slate-600">
+          <span>Anti-Scam Buyer Guarantee:</span><span>$49.00 NZD</span>
+        </div>
+        <div class="flex justify-between border-t border-brand-border/60 pt-2 text-brand-dark font-bold text-sm">
+          <span>Total Payable to Trust Now:</span><span class="text-emerald-700 font-extrabold">$549.00 NZD</span>
+        </div>
+      `;
+      window.openModal('modal-stripe-checkout');
+    };
+
+    window.handleStripePaymentSubmit = function(e) {
+      e.preventDefault();
+      if (!document.getElementById('contract-agree-check').checked) {
+        alert("Please acknowledge the Standard NZ Puppy Purchase Guarantee.");
+        return;
+      }
+
+      const selection = window.appData.selectedReservePuppy;
+      selection.puppy.status = 'Reserved';
+
+      window.appData.escrowLedger.unshift({
+        id: 'DEP-' + Math.floor(1000 + Math.random() * 9000),
+        buyer: document.getElementById('escrow-cardholder').value || "Buyer",
+        breeder: selection.litter.breederName,
+        puppy: selection.puppy.identifier,
+        amount: 500,
+        status: "Held in Trust"
+      });
+
+      window.closeModal('modal-stripe-checkout');
+      window.saveData();
+      window.showToast("Protected $500 NZD Holding Deposit locked in trust!", "fa-shield-halved");
+      window.showPage('detail');
+    };
+
+    // HEAT CYCLES
+    window.openAddHeatModal = function() {
+      document.getElementById('form-heat').reset();
+      document.getElementById('heat-edit-id').value = '';
+      window.openModal('modal-heat-form');
+    };
+
+    window.handleHeatFormSubmit = function(e) {
+      e.preventDefault();
+      const damId = document.getElementById('heat-dam-select').value;
+      const dam = window.appData.dogs.find(d => d.id === damId);
+      const start = document.getElementById('heat-start-date').value;
+      const mating = document.getElementById('heat-mating-date').value;
+
+      let whelp = '';
+      if (mating) {
+        const d = new Date(mating);
+        d.setDate(d.getDate() + 63);
+        whelp = d.toISOString().split('T')[0];
+      }
+
+      window.appData.heatLogs.unshift({
+        id: 'h-' + Date.now(),
+        damName: dam ? dam.callName : 'Dam',
+        startDate: start,
+        matingDate: mating,
+        estWhelp: whelp
+      });
+
+      window.saveData();
+      window.closeModal('modal-heat-form');
+      window.showToast("Heat cycle logged!");
+    };
+
+    // WAITLIST BUYERS
+    window.openAddBuyerModal = function() {
+      document.getElementById('form-buyer').reset();
+      document.getElementById('buyer-edit-id').value = '';
+      window.openModal('modal-buyer-form');
+    };
+
+    window.handleBuyerFormSubmit = function(e) {
+      e.preventDefault();
+      window.appData.buyers.unshift({
+        id: 'b-' + Date.now(),
+        name: document.getElementById('buyer-name').value,
+        contact: document.getElementById('buyer-contact').value,
+        deposit: Number(document.getElementById('buyer-deposit').value || 0),
+        pref: document.getElementById('buyer-pref').value,
+        verifiedProperty: true,
+        date: new Date().toLocaleDateString()
+      });
+      window.saveData();
+      window.closeModal('modal-buyer-form');
+      window.showToast("Waitlist buyer saved with priority rank!");
+    };
+
+    window.handleBuyerApplicationSubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('buyer-app-name').value;
+      const email = document.getElementById('buyer-app-email').value;
+      const phone = document.getElementById('buyer-app-phone').value;
+      const city = document.getElementById('buyer-app-city').value;
+      const prop = document.getElementById('buyer-app-property').value;
+      const notes = document.getElementById('buyer-app-notes').value;
+
+      window.appData.buyers.unshift({
+        id: 'b-' + Date.now(),
+        name: name,
+        contact: `${phone} / ${email} (${city})`,
+        deposit: 0,
+        pref: `[Pre-Screened] ${prop} - ${notes}`,
+        verifiedProperty: true,
+        date: new Date().toLocaleDateString()
+      });
+
+      window.saveData();
+      window.showToast("Pre-Approval Application Approved! Added to priority registry with #1 Queue Status.");
+      e.target.reset();
+      window.showPage('home');
+    };
+
+    // FINANCES & LEDGER
+    window.openAddFinanceModal = function() {
+      document.getElementById('form-finance').reset();
+      document.getElementById('finance-edit-id').value = '';
+      window.openModal('modal-finance-form');
+    };
+
+    window.handleFinanceFormSubmit = function(e) {
+      e.preventDefault();
+      window.appData.finances.unshift({
+        id: 'fin-' + Date.now(),
+        type: document.getElementById('fin-type').value,
+        amount: Number(document.getElementById('fin-amount').value),
+        category: document.getElementById('fin-cat').value,
+        desc: document.getElementById('fin-desc').value,
+        date: document.getElementById('fin-date').value
+      });
+      window.saveData();
+      window.closeModal('modal-finance-form');
+      window.showToast("Transaction saved!");
+    };
+
+    // DROPDOWNS & DIRECTORY
+    window.populateDropdowns = function() {
+      const damSelect = document.getElementById('litter-dam');
+      const sireSelect = document.getElementById('litter-sire');
+      const heatSelect = document.getElementById('heat-dam-select');
+
+      const dams = window.appData.dogs.filter(d => d.role === 'Dam');
+      const sires = window.appData.dogs.filter(d => d.role === 'Sire');
+
+      if (damSelect) damSelect.innerHTML = dams.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+      if (sireSelect) sireSelect.innerHTML = sires.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+      if (heatSelect) heatSelect.innerHTML = dams.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+    };
+
+    window.renderDirectory = function() {
+      const dirGrid = document.getElementById('directory-grid');
+      if (!dirGrid) return;
+
+      const breeders = [
+        { name: "Highland Pedigrees NZ", location: "Cambridge, Waikato", breeds: "French Bulldog", isDogsNZ: true, prefix: "HIGHLAND" },
+        { name: "Aoraki Goldens NZ", location: "Canterbury", breeds: "Golden Retriever", isDogsNZ: true, prefix: "AORAKI" },
+        { name: "Southern Working Paws", location: "Otago", breeds: "Border Collie", isDogsNZ: false },
+        { 
+          name: window.appData.settings.kennelName, 
+          location: window.appData.settings.location, 
+          breeds: window.appData.settings.breeds, 
+          isDogsNZ: window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved', 
+          prefix: (window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.prefix) || ''
+        }
+      ];
+
+      dirGrid.innerHTML = breeders.map(b => `
+        <div class="bg-white rounded-3xl p-6 border ${b.isDogsNZ ? 'border-dogsnz-gold/60 shadow-md ring-1 ring-dogsnz-gold/30' : 'border-brand-border/60 shadow-sm'} space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-display font-bold text-lg text-brand-dark">${b.name}</h4>
+              <p class="text-xs text-slate-500">${b.location}</p>
+            </div>
+            ${b.isDogsNZ ? `
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold">
+                <i class="fa-solid fa-award mr-1"></i> Dogs NZ Prefix
+              </span>
+            ` : `
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-100 text-brand-accent">Verified</span>
+            `}
+          </div>
+          <p class="text-xs text-slate-600">Specializing in: <strong>${b.breeds}</strong></p>
+          ${b.isDogsNZ ? `<p class="text-[11px] font-bold text-dogsnz-blue">Registered Prefix: ${b.prefix}</p>` : ''}
+          <button onclick="window.showPage('home')" class="w-full py-2 bg-brand-light hover:bg-brand-pink/20 text-brand-dark rounded-xl text-xs font-bold transition">View Litters</button>
+        </div>
+      `).join('');
+    };
+
+    window.renderAllModules = function() {
+      const myDogs = window.appData.dogs;
+      const myLitters = window.appData.litters;
+
+      document.getElementById('dash-kennel-name').innerText = window.appData.settings.kennelName;
+      document.getElementById('stat-total-dogs').innerText = myDogs.length;
+      document.getElementById('stat-active-dams').innerText = myDogs.filter(d => d.role === 'Dam').length;
+      document.getElementById('stat-active-sires').innerText = myDogs.filter(d => d.role === 'Sire').length;
+      document.getElementById('stat-active-litters').innerText = myLitters.length;
+      
+      let totalPups = 0;
+      myLitters.forEach(l => totalPups += (l.puppies || []).length);
+      document.getElementById('stat-total-puppies').innerText = `${totalPups} Puppies Logged`;
+
+      // Render Dogs Grid with Lineage
+      const dogsGrid = document.getElementById('dogs-grid');
+      if (dogsGrid) {
+        dogsGrid.innerHTML = myDogs.length ? myDogs.map(d => `
+          <div class="bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3 flex flex-col justify-between">
+            <div>
+              <div class="relative">
+                <img src="${d.photo}" class="w-full h-48 object-cover rounded-2xl">
+                <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${d.role === 'Dam' ? 'bg-pink-100 text-brand-pink' : 'bg-blue-100 text-blue-700'}">${d.role}</span>
+              </div>
+              <div class="mt-3">
+                <h4 class="font-bold text-brand-dark text-base">${d.callName}</h4>
+                <p class="text-xs text-slate-500">${d.name} · ${d.breed}</p>
+                ${(d.pedigreeSire || d.pedigreeDam) ? `
+                  <p class="text-[11px] text-brand-primary font-semibold mt-1">
+                    <i class="fa-solid fa-sitemap mr-1"></i> Lineage: ${d.pedigreeSire || 'Unknown Sire'} × ${d.pedigreeDam || 'Unknown Dam'}
+                  </p>
+                ` : ''}
+                <p class="text-xs bg-brand-light p-2.5 rounded-xl mt-2 text-slate-700">${d.health || 'DNA Testing Documented'}</p>
+              </div>
+
+              <!-- Attached Clearance Certificates -->
+              <div class="mt-3 pt-3 border-t border-slate-100">
+                <div class="flex justify-between items-center mb-1.5">
+                  <span class="text-[10px] uppercase font-bold text-slate-400">Clearances & Documents</span>
+                  <button onclick="window.openDogDocModal('${d.id}')" class="text-[10px] font-bold text-brand-pink hover:underline">+ Attach File</button>
+                </div>
+                <div class="space-y-1">
+                  ${(d.documents && d.documents.length) ? d.documents.map(doc => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                      <div class="flex items-center space-x-2 truncate">
+                        <i class="fa-solid fa-file-pdf text-brand-accent"></i>
+                        <span class="truncate font-semibold text-[11px]">${doc.title}</span>
+                      </div>
+                      <a href="${doc.url}" target="_blank" class="text-[10px] font-bold text-brand-primary hover:underline ml-2">View</a>
+                    </div>
+                  `).join('') : `<p class="text-[11px] text-slate-400 italic">No certificates attached yet.</p>`}
+                </div>
+              </div>
+            </div>
+
+            <!-- Dog Action Buttons -->
+            <div class="flex space-x-2 pt-3 border-t border-slate-100">
+              <button onclick="window.openEditDogModal('${d.id}')" class="flex-1 py-2 rounded-xl bg-brand-light hover:bg-brand-pink/20 text-brand-dark font-bold text-xs transition">
+                <i class="fa-solid fa-pen-to-square mr-1 text-brand-pink"></i> Edit
+              </button>
+              <button onclick="window.deleteDog('${d.id}')" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('') : `<div class="col-span-full py-12 text-center text-xs text-slate-400 bg-white rounded-3xl">No breeding stock registered yet. Click 'Add Dog' above.</div>`;
+      }
+
+      // Render Litters with Milestones Button
+      const littersList = document.getElementById('litters-list');
+      if (littersList) {
+        littersList.innerHTML = myLitters.map(l => `
+          <div class="bg-white rounded-3xl p-6 border border-brand-border/60 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <h4 class="font-bold text-lg text-brand-dark">${l.name}</h4>
+                <p class="text-xs text-slate-500">Whelp Date: ${l.dob} · $${l.price} NZD</p>
+                ${(l.milestones && l.milestones.length) ? `
+                  <span class="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                    ${l.milestones.length} Developmental Milestones Logged
+                  </span>
+                ` : ''}
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="window.openMilestoneModal('${l.id}')" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                  <i class="fa-solid fa-chart-line mr-1 text-emerald-600"></i> Post Milestone
+                </button>
+                <button onclick="window.openAddPuppyModal('${l.id}')" class="px-3.5 py-1.5 gradient-accent text-white font-bold text-xs rounded-xl shadow">+ Add Puppy</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Heat Logs
+      const heatGrid = document.getElementById('heat-logs-list');
+      if (heatGrid) {
+        heatGrid.innerHTML = window.appData.heatLogs.map(h => `
+          <div class="bg-white p-5 rounded-3xl border border-brand-border/60 shadow-sm space-y-2">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-fire-flame-curved text-brand-accent"></i>
+              <h4 class="font-bold text-brand-dark">${h.damName}</h4>
+            </div>
+            <p class="text-xs text-slate-500">Cycle Start: ${h.startDate} ${h.matingDate ? `· Mating: ${h.matingDate}` : ''}</p>
+            ${h.estWhelp ? `<p class="text-xs font-bold text-emerald-600 bg-emerald-50 p-2 rounded-xl inline-block">Estimated Whelping Date: ${h.estWhelp}</p>` : ''}
+          </div>
+        `).join('');
+      }
+
+      // Render Waitlist Buyers (WITH PRIORITY QUEUE RANKING & PROPERTY BADGES)
+      const buyersGrid = document.getElementById('buyers-grid');
+      if (buyersGrid) {
+        buyersGrid.innerHTML = window.appData.buyers.map((b, idx) => `
+          <div class="bg-white p-5 rounded-3xl border border-brand-border/60 shadow-sm space-y-2 relative">
+            <span class="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-light text-brand-primary border border-brand-border">
+              Priority Queue #${idx + 1}
+            </span>
+            <h4 class="font-bold text-brand-dark text-sm">${b.name}</h4>
+            <p class="text-xs text-slate-500">${b.contact}</p>
+            <div class="flex items-center space-x-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-md">
+                <i class="fa-solid fa-house-chimney-check mr-1"></i> Fenced Yard Verified
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 bg-brand-light p-2 rounded-xl mt-1">${b.pref || 'Standard Waitlist'}</p>
+          </div>
+        `).join('');
+      }
+
+      // Render Finances
+      const finTable = document.getElementById('finance-table-body');
+      if (finTable) {
+        finTable.innerHTML = window.appData.finances.map(f => `
+          <tr class="hover:bg-brand-light/30 transition">
+            <td class="p-3 text-xs">${f.date}</td>
+            <td class="p-3 text-xs font-bold text-brand-dark">${f.category}</td>
+            <td class="p-3 text-xs">${f.desc}</td>
+            <td class="p-3 text-xs font-bold ${f.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}">${f.type}</td>
+            <td class="p-3 text-xs text-right font-bold">$${f.amount.toFixed(2)}</td>
+            <td class="p-3 text-xs text-right"><button onclick="window.showToast('Transaction logged')" class="text-brand-pink font-bold hover:underline">Receipt</button></td>
+          </tr>
+        `).join('');
+      }
+
+      window.updateAuthUI();
+    };
+
+    window.renderMarketplaceHome = function() {
+      const grid = document.getElementById('public-marketplace-grid');
+      if (!grid) return;
+
+      const regFilter = document.getElementById('filter-registry').value;
+      const breedFilter = document.getElementById('filter-breed').value;
+
+      let all = [...window.publicMarketplaceLitters, ...window.appData.litters.filter(l => l.isPublished)];
+
+      if (regFilter === 'dogsnz') all = all.filter(l => l.isDogsNZ);
+      if (regFilter === 'general') all = all.filter(l => !l.isDogsNZ);
+      if (breedFilter !== 'all') all = all.filter(l => l.breed === breedFilter);
+
+      grid.innerHTML = all.map(l => `
+        <div onclick="window.viewListingDetail('${l.id}')" class="bg-white rounded-3xl overflow-hidden border ${l.isDogsNZ ? 'border-dogsnz-gold/60 ring-1 ring-dogsnz-gold/40' : 'border-brand-border/60'} shadow-sm hover:shadow-xl transition cursor-pointer">
+          <div class="relative">
+            <img src="${(l.gallery && l.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'}" class="w-full h-52 object-cover">
+            ${l.isDogsNZ ? `
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold shadow-md">
+                <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix
+              </span>
+            ` : ''}
+          </div>
+          <div class="p-5 space-y-2">
+            <div class="flex justify-between items-start">
+              <h3 class="font-bold text-base text-brand-dark">${l.name}</h3>
+              <span class="font-extrabold text-brand-accent">$${l.price}</span>
+            </div>
+            <p class="text-xs text-slate-500">${l.location || 'New Zealand'} · ${l.breederName}</p>
+            <div class="flex items-center space-x-1.5 pt-1">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-dna mr-1"></i> DNA Cleared</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-brand-primary">Protected Deposit</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.location.hash && window.location.hash.includes('type=recovery')) {
+        window.openModal('modal-update-password');
+      }
+
+      if (window.supabaseClient) {
+        const { data } = await window.supabaseClient.auth.getSession();
+        if (data && data.session && data.session.user) {
+          window.appData.currentUser = {
+            id: data.session.user.id,
+            email: data.session.user.email,
+            role: "breeder",
+            kennel: data.session.user.email.split('@')[0] + ' Kennel',
+            tier: "Verified Breeder"
+          };
+          await window.loadUserDataFromCloud();
+        }
+      }
+      window.updateAuthUI();
+      window.renderAllModules();
+      await window.loadPublicMarketplaceLitters();
+      window.showPage('home');
+    });
+  </script>
+</body>
+</html>
