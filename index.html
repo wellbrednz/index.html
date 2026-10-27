@@ -1282,1286 +1282,1753 @@
     </div>
   </div>
 
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>WellBred NZ — Dog Breeder Suite & Verified Marketplace</title>
-
-  <!-- Google Fonts & FontAwesome -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- JAVASCRIPT APPLICATION LOGIC ENGINE -->
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#310A34',
-              primary: '#5B1A5D',
-              accent: '#E01E5A',
-              pink: '#FF2E93',
-              light: '#F8F1FA',
-              card: '#FFFFFF',
-              border: '#E8D5EC'
-            },
-            dogsnz: {
-              blue: '#0B3B60',
-              gold: '#D4AF37',
-              light: '#EBF3FA'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Outfit', 'sans-serif'],
+    window.supabaseClient = null;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        window.supabaseClient = window.supabase.createClient(
+          'https://cxbpmttlljctuhzbetvm.supabase.co',
+          'sb_publishable_Tu_JlteIDIeBk74TzHNQ7Q_eLY4BT8h'
+        );
+      }
+    } catch (e) {
+      console.warn("Supabase SDK fallback mode.");
+    }
+
+    const BUCKET_NAME = 'dog-photos';
+    const STORAGE_KEY_PREFIX = 'wellbred_nz_user_';
+    let currentActiveChatContact = null;
+    window.activeBreederName = "Highland Pedigrees NZ";
+    let pendingCheckoutTier = null;
+
+    window.showToast = function(msg, icon = 'fa-circle-check') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast || !toastMsg || !toastIcon) return;
+      toastMsg.innerText = msg;
+      toastIcon.className = `fa-solid ${icon} text-brand-pink text-base`;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    };
+
+    // OFFICIAL DOGS NZ FULL BREED REGISTRY CATALOG
+    const DOGS_NZ_BREED_CATALOG = [
+      "Affenpinscher", "Afghan Hound", "Airedale Terrier", "Akita", "Alaskan Malamute", "American Cocker Spaniel", 
+      "American Staffordshire Terrier", "Anatolian Shepherd Dog", "Australian Cattle Dog", "Australian Kelpie", 
+      "Australian Shepherd", "Australian Silky Terrier", "Australian Terrier", "Basenji", "Basset Fauve de Bretagne", 
+      "Basset Hound", "Beagle", "Bearded Collie", "Beauceron", "Bedlington Terrier", "Belgian Shepherd (Groenendael)", 
+      "Belgian Shepherd (Laekenois)", "Belgian Shepherd (Malinois)", "Belgian Shepherd (Tervueren)", "Bergamasco Shepherd Dog", 
+      "Bernese Mountain Dog", "Bichon Frise", "Bloodhound", "Border Collie", "Border Terrier", "Borzoi", "Boston Terrier", 
+      "Bouvier des Flandres", "Boxer", "Bracco Italiano", "Briard", "Brittany", "Bullmastiff", "Bull Terrier", 
+      "Bull Terrier (Miniature)", "Cairn Terrier", "Canaan Dog", "Cavalier King Charles Spaniel", "Cesky Terrier", 
+      "Chesapeake Bay Retriever", "Chihuahua (Long Coat)", "Chihuahua (Smooth Coat)", "Chinese Crested Dog", "Chow Chow", 
+      "Clumber Spaniel", "Cocker Spaniel", "Collie (Rough)", "Collie (Smooth)", "Coton De Tulear", "Curly Coated Retriever", 
+      "Dachshund (Long Haired)", "Dachshund (Miniature Long Haired)", "Dachshund (Smooth Haired)", "Dachshund (Miniature Smooth Haired)", 
+      "Dachshund (Wire Haired)", "Dachshund (Miniature Wire Haired)", "Dalmatian", "Dandie Dinmont Terrier", "Deerhound", 
+      "Dobermann", "Dogue de Bordeaux", "English Setter", "English Springer Spaniel", "English Toy Terrier", "Entlebucher Mountain Dog", 
+      "Eurasier", "Field Spaniel", "Finnish Lapphund", "Finnish Spitz", "Flat Coated Retriever", "Foxhound", 
+      "Fox Terrier (Smooth)", "Fox Terrier (Wire)", "French Bulldog", "German Pinscher", "German Shepherd Dog", 
+      "German Shorthaired Pointer", "German Wirehaired Pointer", "Giant Schnauzer", "Glen of Imaal Terrier", "Golden Retriever", 
+      "Gordon Setter", "Great Dane", "Great Swiss Mountain Dog", "Greyhound", "Griffon Bruxellois", "Harrier", "Havanese", 
+      "Hungarian Puli", "Hungarian Vizsla", "Hungarian Wirehaired Vizsla", "Ibizan Hound", "Irish Red and White Setter", 
+      "Irish Setter", "Irish Terrier", "Irish Water Spaniel", "Irish Wolfhound", "Italian Greyhound", "Italian Spinone", 
+      "Japanese Akita Inu", "Japanese Chin", "Japanese Spitz", "Keeshond", "Kerry Blue Terrier", "King Charles Spaniel", 
+      "Komondor", "Kuvasz", "Labrador Retriever", "Lagotto Romagnolo", "Lakeland Terrier", "Leonberger", "Lhasa Apso", 
+      "Lowchen", "Maltese", "Manchester Terrier", "Maremma Sheepdog", "Mastiff", "Miniature Pinscher", "Miniature Schnauzer", 
+      "Neapolitan Mastiff", "Newfoundland", "Norfolk Terrier", "Norwegian Buhund", "Norwegian Elkhound", "Norwich Terrier", 
+      "Nova Scotia Duck Tolling Retriever", "Old English Shepherd Dog", "Papillon", "Parson Russell Terrier", "Pekingese", 
+      "Petit Basset Griffon Vendeen", "Pharaoh Hound", "Pointer", "Pomeranian", "Poodle (Standard)", "Poodle (Miniature)", 
+      "Poodle (Toy)", "Portuguese Water Dog", "Pug", "Pyrenean Mountain Dog", "Rhodesian Ridgeback", "Rottweiler", 
+      "Russian Toy", "Saluki", "Samoyed", "Schipperke", "Schnauzer", "Scottish Terrier", "Sealyham Terrier", "Shar Pei", 
+      "Shetland Sheepdog", "Shiba Inu", "Shih Tzu", "Siberian Husky", "Skye Terrier", "Sloughi", "Soft Coated Wheaten Terrier", 
+      "Spanish Water Dog", "Staffordshire Bull Terrier", "Standard Schnauzer", "Sussex Spaniel", "Swedish Vallhund", 
+      "Tibetan Mastiff", "Tibetan Spaniel", "Tibetan Terrier", "Weimaraner", "Welsh Corgi (Cardigan)", "Welsh Corgi (Pembroke)", 
+      "Welsh Springer Spaniel", "Welsh Terrier", "West Highland White Terrier", "Whippet", "White Swiss Shepherd Dog", 
+      "Wirehaired Slovakian Pointer", "Yorkshire Terrier"
+    ].sort();
+
+    function initBreedCatalogs() {
+      document.querySelectorAll('.breed-select-catalog').forEach(sel => {
+        const currentVal = sel.value;
+        const hasAll = sel.id === 'filter-breed';
+        sel.innerHTML = (hasAll ? '<option value="all">All Breeds</option>' : '') + 
+          DOGS_NZ_BREED_CATALOG.map(b => `<option value="${b}">${b}</option>`).join('');
+        if (currentVal) sel.value = currentVal;
+      });
+    }
+
+    const defaultData = {
+      currentUser: null,
+      settings: {
+        kennelName: "Highland Pedigrees NZ",
+        regNumber: "HIGHLAND",
+        breeds: "French Bulldog",
+        location: "Cambridge, Waikato",
+        bio: "Dedicated preservation breeders raising DNA-tested, socialized puppies inside our family home.",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+        autoReplyEnabled: true,
+        autoReplyMessage: "Kia ora! Thank you for inquiring about our puppies. We are currently reviewing applications. For priority waitlist placement, please ensure you have completed verified buyer pre-approval!"
+      },
+      tiers: [
+        { id: 'tier-starter', name: 'Community / Starter', price: 0, annualPrice: 0, commission: 8.0, desc: 'Free roster & kennel utility for small hobby & non-pedigree breeders.', features: ['Digital Breeding Stock Roster', 'Heat Cycle & Gestation Log', 'Private Waitlist Management', 'Directory Listing', '8.0% Trust Placement Fee'] },
+        { id: 'tier-verified', name: 'Verified Breeder', price: 29, annualPrice: 290, commission: 4.5, desc: 'Standard verification for ethical breeders across New Zealand.', features: ['Verified Pink Shield Badge', 'Published Marketplace Litters', 'Direct Buyer Messaging & Chat', 'DNA & Health Document Release', '4.5% Trust Placement Fee'] },
+        { id: 'tier-dogsnz', name: 'Dogs NZ Pedigree Member', price: 39, annualPrice: 360, commission: 3.5, isDogsNZOnly: true, desc: 'Exclusive tier for verified Dogs NZ kennel prefix owners (Requires audit).', features: ['Official Dogs NZ Certified Gold Badge', 'Verified Prefix & Club Display', 'Priority Search Directory Placement', 'Direct Buyer Messaging & Chat', 'Reduced 3.5% Trust Placement Fee'] },
+        { id: 'tier-premier', name: 'Premier / Gold Platinum', price: 79, annualPrice: 750, commission: 2.5, desc: 'High-volume operations requiring full inquiry funnel automation.', features: ['Automated Sales Funnel Responder', 'Top-Row Search Spotlight Placement', 'Lowest 2.5% Trust Placement Fee', 'All Dogs NZ Badges (if verified)', 'Direct Breeder-to-Breeder Network'] }
+      ],
+      dogsNZCredentials: {
+        status: 'approved',
+        membershipNumber: '098452',
+        prefix: 'HIGHLAND',
+        club: 'Central French Bulldog Club',
+        certUrl: '',
+        submittedAt: '2026-09-01'
+      },
+      dogs: [],
+      litters: [],
+      buyers: [],
+      heatLogs: [],
+      finances: [],
+      escrowLedger: [],
+      notifications: [],
+      conversations: [],
+      tasks: [
+        { id: 't1', text: "Schedule 6-week vet health checks & microchipping", completed: false },
+        { id: 't2', text: "Submit Orivet DNA cheek swabs for Ruby's litter", completed: true }
+      ],
+      selectedReservePuppy: null
+    };
+
+    const seedPublicLitters = [
+      {
+        id: "demo-litter-101",
+        owner_id: "demo-breeder-1",
+        name: "Spring Lilac & Tan Frenchie Litter",
+        breed: "French Bulldog",
+        dob: "2026-09-15",
+        readyDate: "2026-11-10",
+        price: 3800,
+        location: "Cambridge, Waikato",
+        breederName: "Highland Pedigrees NZ",
+        breederEmail: "highland@wellbred.co.nz",
+        breederBio: "Preservation breeders focused on airway health (BOAS 0/0), functional structure, and early puppy culture.",
+        breederAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+        isDogsNZ: true,
+        dogsNZPrefix: "HIGHLAND",
+        verified: true,
+        isPublished: true,
+        pedigree: {
+          sire: "Ch. Highland Silver Baron (Imp UK)",
+          dam: "Highland Bella Rose NZ",
+          sireSire: "Gr. Ch. UK Gold Sovereign",
+          sireDam: "Lady Beatrice of Thames",
+          damSire: "Ch. Aoraki Blue Thunder",
+          damDam: "Waikato Sweet Clover"
+        },
+        gallery: ["https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80"],
+        healthStats: [
+          { test: "Orivet Full DNA Panel", result: "100% Cleared (0/215 Diseases)", verified: true },
+          { test: "OFA Hips / Spine", result: "Scored Grade 1 / Excellent", verified: true }
+        ],
+        description: "Exceptional litter of DNA tested, health guaranteed purebred French Bulldogs.",
+        puppies: [
+          { id: "dp1", identifier: "Pink Collar (Rosie)", gender: "Female", color: "Lilac Tan", chip: "90011300012", status: "Reserved", price: 4000, photo: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=500&q=80" },
+          { id: "dp2", identifier: "Blue Collar (Barnaby)", gender: "Male", color: "Fawn", chip: "90011300013", status: "Available", price: 3800, photo: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=500&q=80" }
+        ]
+      }
+    ];
+
+    window.appData = { ...defaultData };
+    window.publicMarketplaceLitters = [...seedPublicLitters];
+
+    function getUserStorageKey() {
+      const uid = window.appData.currentUser ? window.appData.currentUser.id : 'guest';
+      return STORAGE_KEY_PREFIX + uid;
+    }
+
+    window.saveData = function() {
+      try {
+        const cleanPayload = {
+          settings: window.appData.settings,
+          dogsNZCredentials: window.appData.dogsNZCredentials,
+          dogs: window.appData.dogs,
+          litters: window.appData.litters,
+          buyers: window.appData.buyers,
+          heatLogs: window.appData.heatLogs,
+          finances: window.appData.finances,
+          escrowLedger: window.appData.escrowLedger,
+          notifications: window.appData.notifications,
+          conversations: window.appData.conversations,
+          tasks: window.appData.tasks
+        };
+        localStorage.setItem(getUserStorageKey(), JSON.stringify(cleanPayload));
+      } catch (e) {
+        console.warn("Storage quota hit", e);
+      }
+      window.renderAllModules();
+    };
+
+    window.loadUserDataFromCloud = async function() {
+      if (!window.appData.currentUser) return;
+      const uid = window.appData.currentUser.id;
+
+      try {
+        const cached = localStorage.getItem(getUserStorageKey());
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          window.appData.dogs = parsed.dogs || [];
+          window.appData.litters = parsed.litters || [];
+          window.appData.buyers = parsed.buyers || [];
+          window.appData.heatLogs = parsed.heatLogs || [];
+          window.appData.finances = parsed.finances || [];
+          window.appData.escrowLedger = parsed.escrowLedger || [];
+          window.appData.notifications = parsed.notifications || [];
+          window.appData.conversations = parsed.conversations || [];
+          window.appData.tasks = parsed.tasks || defaultData.tasks;
+          if (parsed.settings) window.appData.settings = parsed.settings;
+          if (parsed.dogsNZCredentials) window.appData.dogsNZCredentials = parsed.dogsNZCredentials;
+        }
+      } catch (e) {}
+
+      if (window.supabaseClient) {
+        try {
+          const { data: cloudDogs } = await window.supabaseClient.from('dogs').select('*').eq('owner_id', uid);
+          if (cloudDogs && cloudDogs.length > 0) {
+            window.appData.dogs = cloudDogs.map(d => ({
+              id: d.id,
+              owner_id: d.owner_id,
+              name: d.name,
+              callName: d.call_name || d.name,
+              role: d.role || 'Dam',
+              breed: d.breed || '',
+              dob: d.dob || '',
+              photo: d.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80',
+              health: d.health || '',
+              pedigreeSire: d.pedigree_sire || '',
+              pedigreeDam: d.pedigree_dam || '',
+              documents: d.documents || []
+            }));
           }
+
+          const { data: cloudLitters } = await window.supabaseClient.from('litters').select('*').eq('owner_id', uid);
+          if (cloudLitters && cloudLitters.length > 0) {
+            const { data: cloudPuppies } = await window.supabaseClient.from('puppies').select('*').eq('owner_id', uid);
+            window.appData.litters = cloudLitters.map(l => ({
+              id: l.id,
+              owner_id: l.owner_id,
+              name: l.name,
+              dob: l.dob || '',
+              readyDate: l.ready_date || '',
+              price: l.price || 3500,
+              isPublished: l.is_published !== false,
+              isDogsNZ: window.appData.dogsNZCredentials.status === 'approved',
+              dogsNZPrefix: window.appData.dogsNZCredentials.prefix,
+              breed: l.breed || window.appData.settings.breeds,
+              location: l.location || window.appData.settings.location,
+              breederName: l.breeder_name || window.appData.settings.kennelName,
+              breederAvatar: window.appData.settings.avatar,
+              breederBio: window.appData.settings.bio,
+              gallery: l.photo ? [l.photo] : ['https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'],
+              description: l.description || '',
+              puppies: (cloudPuppies || []).filter(p => p.litter_id === l.id).map(p => ({
+                id: p.id,
+                identifier: p.collar,
+                gender: p.gender || 'Male',
+                color: p.color || '',
+                chip: p.microchip || '',
+                price: p.price || l.price,
+                status: p.status || 'Available',
+                photo: p.photo || ''
+              }))
+            }));
+          }
+        } catch (err) {}
+      }
+
+      window.saveData();
+      window.renderAllModules();
+    };
+
+    window.loadPublicMarketplaceLitters = async function() {
+      let combined = [...seedPublicLitters];
+
+      if (window.supabaseClient) {
+        try {
+          const { data: published, error } = await window.supabaseClient.from('litters').select('*').eq('is_published', true);
+          if (!error && published && published.length > 0) {
+            const { data: puppies } = await window.supabaseClient.from('puppies').select('*');
+            const fetched = published.map(l => ({
+              id: l.id,
+              owner_id: l.owner_id,
+              name: l.name,
+              dob: l.dob,
+              readyDate: l.ready_date,
+              price: l.price || 3500,
+              breed: l.breed || 'Pedigree Breed',
+              location: l.location || 'New Zealand',
+              breederName: l.breeder_name || 'Verified NZ Breeder',
+              breederBio: l.description ? l.description.substring(0, 100) + '...' : 'Ethical registered breeder.',
+              breederAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+              isDogsNZ: false,
+              verified: true,
+              isPublished: true,
+              gallery: l.photo ? [l.photo] : ['https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'],
+              description: l.description || '',
+              puppies: (puppies || []).filter(p => p.litter_id === l.id).map(p => ({
+                id: p.id,
+                identifier: p.collar,
+                gender: p.gender,
+                color: p.color,
+                chip: p.microchip,
+                price: p.price,
+                status: p.status,
+                photo: p.photo
+              }))
+            }));
+            combined = [...combined, ...fetched];
+          }
+        } catch (err) {}
+      }
+
+      if (window.appData.litters) {
+        window.appData.litters.filter(l => l.isPublished).forEach(localL => {
+          if (!combined.some(c => c.id === localL.id)) {
+            combined.push(localL);
+          }
+        });
+      }
+
+      window.publicMarketplaceLitters = combined;
+      window.renderMarketplaceHome();
+    };
+
+    async function uploadImageFile(file, folder = 'dogs') {
+      if (!file) return null;
+      if (window.supabaseClient) {
+        try {
+          const rawExt = file.name.split('.').pop() || 'jpg';
+          const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cleanFileName = `${folder}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
+
+          const { error } = await window.supabaseClient.storage.from(BUCKET_NAME).upload(cleanFileName, file, { contentType: file.type || 'image/jpeg', upsert: true });
+          if (error) {
+            console.error("Storage upload error:", error);
+            alert("Upload rejected: " + error.message);
+            return null;
+          }
+          const { data: publicUrlData } = window.supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(cleanFileName);
+          return publicUrlData.publicUrl;
+        } catch (err) {}
+      }
+      return null;
+    }
+
+    window.showPage = function(pageId) {
+      document.getElementById('view-public-home').classList.add('hidden');
+      document.getElementById('view-listing-detail').classList.add('hidden');
+      document.getElementById('view-breeder-profile').classList.add('hidden');
+      document.getElementById('view-public-directory').classList.add('hidden');
+      document.getElementById('view-public-apply').classList.add('hidden');
+      document.getElementById('view-breeder-suite').classList.add('hidden');
+
+      if (pageId === 'home') {
+        document.getElementById('view-public-home').classList.remove('hidden');
+        window.loadPublicMarketplaceLitters();
+      } else if (pageId === 'detail') {
+        document.getElementById('view-listing-detail').classList.remove('hidden');
+      } else if (pageId === 'directory') {
+        document.getElementById('view-public-directory').classList.remove('hidden');
+        window.renderDirectory();
+      } else if (pageId === 'buyer-approval') {
+        document.getElementById('view-public-apply').classList.remove('hidden');
+      } else if (pageId === 'breeder') {
+        if (!window.appData.currentUser) {
+          window.openModal('modal-auth');
+          return;
+        }
+        document.getElementById('view-breeder-suite').classList.remove('hidden');
+        window.navigateBreederTab('dash');
+      }
+      window.scrollTo(0, 0);
+    };
+
+    window.navigateBreederTab = function(tabId) {
+      document.querySelectorAll('#breeder-content-area > section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById('mod-' + tabId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.breeder-nav-btn').forEach(btn => {
+        btn.classList.remove('bg-white/15', 'text-white', 'font-bold');
+        btn.classList.add('text-pink-100/80');
+      });
+      const activeNav = document.getElementById('nav-' + tabId);
+      if (activeNav) {
+        activeNav.classList.add('bg-white/15', 'text-white', 'font-bold');
+        activeNav.classList.remove('text-pink-100/80');
+      }
+
+      if (tabId === 'dash') window.renderDashboardDetails();
+      if (tabId === 'inbox') window.renderConversationList();
+      if (tabId === 'notifications') window.renderNotificationsTab();
+      if (tabId === 'subscriptions') window.renderSubscriptionTiers();
+      if (tabId === 'dogsnz-portal') window.renderDogsNZPortalTab();
+      if (tabId === 'admin') window.renderAdminAuditQueue();
+      if (tabId === 'settings') window.renderSettingsForm();
+      window.populateDropdowns();
+      window.scrollTo(0, 0);
+    };
+
+    window.openModal = function(id) {
+      window.populateDropdowns();
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    };
+
+    window.closeModal = function(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    };
+
+    window.toggleForgotPassView = function(showForgot) {
+      document.getElementById('form-login-main').classList.toggle('hidden', showForgot);
+      document.getElementById('form-forgot-pass').classList.toggle('hidden', !showForgot);
+      document.getElementById('auth-modal-title').innerText = showForgot ? "Reset Password" : "Breeder Suite Login";
+    };
+
+    window.handleForgotPasswordSubmit = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmail').value.trim();
+      if (window.supabaseClient) {
+        const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+        if (error) alert("Reset error: " + error.message);
+        else {
+          alert("Reset email sent to " + email);
+          window.toggleForgotPassView(false);
+          window.closeModal('modal-auth');
         }
       }
-    }
-  </script>
+    };
 
-  <!-- Supabase JS Client Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    window.handleLoginSubmit = async function(e) {
+      e.preventDefault();
+      const emailVal = document.getElementById('loginEmail').value.trim();
+      const passVal = document.getElementById('loginPassword').value.trim();
 
-  <style>
-    .gradient-accent { background: linear-gradient(135deg, #E01E5A 0%, #FF2E93 100%); }
-    .gradient-plum { background: linear-gradient(135deg, #310A34 0%, #5B1A5D 50%, #E01E5A 100%); }
-    .hero-banner-bg {
-      background: linear-gradient(rgba(49, 10, 52, 0.8), rgba(49, 10, 52, 0.72)),
-                  url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1600&q=80');
-      background-size: cover;
-      background-position: center;
-    }
-    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #E8D5EC; border-radius: 8px; }
-  </style>
-</head>
+      if (emailVal.toLowerCase() === 'admin' && passVal === 'wellbrednz') {
+        window.appData.currentUser = { id: "usr-admin-master", email: "admin@wellbred.co.nz", role: "admin", kennel: "WellBred HQ Admin", tier: "Premier / Gold Platinum" };
+        document.getElementById('nav-admin').classList.remove('hidden');
+        window.showToast("Logged in as Platform Auditor!");
+        window.closeModal('modal-auth');
+        await window.loadUserDataFromCloud();
+        window.updateAuthUI();
+        window.showPage('breeder');
+        return;
+      }
 
-<body class="bg-[#F8F3F9] text-slate-800 font-sans min-h-screen antialiased flex flex-col">
+      if (window.supabaseClient) {
+        try {
+          let { data, error } = await window.supabaseClient.auth.signInWithPassword({ email: emailVal, password: passVal });
+          if (error && (error.message.includes('Invalid login') || error.message.includes('not found'))) {
+            const { data: suData } = await window.supabaseClient.auth.signUp({ email: emailVal, password: passVal });
+            data = suData;
+          }
+          if (data && data.user) {
+            window.appData.currentUser = { id: data.user.id, email: data.user.email, role: "breeder", kennel: emailVal.split('@')[0] + ' Kennel', tier: "Verified Breeder" };
+          }
+        } catch (err) {
+          window.appData.currentUser = { id: 'usr-' + btoa(emailVal).replace(/=/g, ''), email: emailVal, role: "breeder", kennel: emailVal.split('@')[0] + ' Kennel', tier: "Verified Breeder" };
+        }
+      }
+      window.closeModal('modal-auth');
+      await window.loadUserDataFromCloud();
+      window.updateAuthUI();
+      window.showPage('breeder');
+    };
 
-  <!-- NOTIFICATION TOAST -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border-l-4 border-brand-pink text-xs font-semibold">
-    <i id="toast-icon" class="fa-solid fa-circle-check text-brand-pink text-base"></i>
-    <span id="toast-msg">Action performed successfully.</span>
-  </div>
+    window.handleLogout = async function() {
+      if (window.supabaseClient) {
+        try { await window.supabaseClient.auth.signOut(); } catch (e) {}
+      }
+      window.appData.currentUser = null;
+      document.getElementById('nav-admin').classList.add('hidden');
+      window.updateAuthUI();
+      window.showPage('home');
+      window.showToast("Signed out successfully.");
+    };
 
-  <!-- TOP HEADER NAVIGATION -->
-  <header class="bg-brand-dark text-white sticky top-0 z-40 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="window.showPage('home')">
-        <div class="w-10 h-10 rounded-2xl gradient-accent flex items-center justify-center text-white font-display font-extrabold text-xl shadow-md">
-          <i class="fa-solid fa-dog"></i>
-        </div>
-        <div class="text-left">
-          <h1 class="font-display font-extrabold text-xl tracking-tight leading-none text-white">wellbred <span class="text-brand-pink">nz</span></h1>
-          <p class="text-[9px] text-pink-200/80 font-semibold uppercase tracking-wider">Ethical Breeder & Trust Deposit Marketplace</p>
-        </div>
-      </div>
+    window.updateAuthUI = function() {
+      const user = window.appData.currentUser;
+      const isAuth = !!user;
+      document.getElementById('auth-controls-guest').classList.toggle('hidden', isAuth);
+      document.getElementById('auth-controls-user').classList.toggle('hidden', !isAuth);
 
-      <nav class="hidden md:flex items-center space-x-2 text-sm font-semibold">
-        <button type="button" onclick="window.showPage('home')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-white transition">Marketplace</button>
-        <button type="button" onclick="window.showPage('directory')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-pink-100/90 transition">Breeder Directory</button>
-        <button type="button" onclick="window.showPage('buyer-approval')" class="px-3 py-1.5 rounded-xl hover:bg-white/10 text-pink-100/90 transition">Buyer Pre-Approval</button>
-      </nav>
+      if (isAuth) {
+        document.getElementById('header-user-kennel').innerText = window.appData.settings.kennelName || user.email;
+        document.getElementById('sidebar-kennel-sub').innerText = window.appData.settings.kennelName || user.email;
+        document.getElementById('user-tier-pill').innerText = user.tier || "Verified";
+      }
 
-      <div class="flex items-center space-x-3">
-        <div id="auth-controls-guest">
-          <button type="button" onclick="window.openModal('modal-auth')" class="px-4 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow-lg hover:opacity-95 transition flex items-center space-x-2">
-            <i class="fa-solid fa-shield-dog"></i>
-            <span>Breeder Suite</span>
-          </button>
-        </div>
-        <div id="auth-controls-user" class="hidden flex items-center space-x-2">
-          <span id="user-tier-pill" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-pink/20 text-brand-pink border border-brand-pink/40">Verified</span>
-          <button type="button" onclick="window.showPage('breeder')" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/20 text-white font-bold text-xs flex items-center space-x-2">
-            <i class="fa-solid fa-gauge-high text-brand-pink"></i>
-            <span id="header-user-kennel">Workspace</span>
-          </button>
-          <button type="button" onclick="window.handleLogout()" title="Log Out" class="p-2 text-pink-200 hover:text-white text-xs">
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+      const unreadCount = (window.appData.conversations || []).reduce((acc, c) => acc + (c.unread || 0), 0);
+      const inboxBadge = document.getElementById('inbox-unread-badge');
+      if (inboxBadge) {
+        inboxBadge.innerText = unreadCount;
+        inboxBadge.classList.toggle('hidden', unreadCount === 0);
+      }
 
-  <!-- MAIN CONTENT WRAPPER -->
-  <main class="flex-1">
+      const unreadNotifs = (window.appData.notifications || []).filter(n => !n.read).length;
+      const notifBadge = document.getElementById('notif-badge');
+      if (notifBadge) {
+        notifBadge.innerText = unreadNotifs;
+        notifBadge.classList.toggle('hidden', unreadNotifs === 0);
+      }
+    };
 
-    <!-- VIEW 1: PUBLIC HOMEPAGE (MARKETPLACE) -->
-    <div id="view-public-home" class="space-y-10 pb-16">
-      <section class="relative hero-banner-bg py-16 px-4 sm:px-6 lg:px-8 text-white shadow-lg">
-        <div class="max-w-4xl w-full mx-auto text-center space-y-6">
-          <span class="inline-block px-3.5 py-1.5 bg-white/15 backdrop-blur-md text-pink-200 border border-brand-pink/40 rounded-full text-xs font-bold uppercase tracking-wider">
-            <i class="fa-solid fa-shield-halved text-brand-pink mr-1.5"></i> DNA Screened & Holding Deposit Protection
-          </span>
-          <h2 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight leading-tight">
-            Find your <span class="inline-block relative">WellBred<span class="absolute left-0 bottom-1 w-full h-2 bg-brand-pink/70 rounded-full -z-10"></span></span> Companion
-          </h2>
-          <p class="text-pink-100 text-sm sm:text-base font-normal max-w-2xl mx-auto">
-            A transparent New Zealand platform connecting families with ethical breeders under secure holding deposit protection, featuring certified Dogs NZ pedigree kennels.
-          </p>
+    window.renderSettingsForm = function() {
+      const s = window.appData.settings;
+      document.getElementById('setting-kennel-name').value = s.kennelName || '';
+      document.getElementById('setting-reg-number').value = s.regNumber || '';
+      document.getElementById('setting-breeds').value = s.breeds || 'French Bulldog';
+      document.getElementById('setting-location').value = s.location || '';
+      document.getElementById('setting-bio').value = s.bio || '';
+      document.getElementById('setting-avatar-url').value = s.avatar || '';
+      document.getElementById('setting-avatar-preview').src = s.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80';
+      document.getElementById('auto-reply-enabled').checked = s.autoReplyEnabled !== false;
+      document.getElementById('auto-reply-text').value = s.autoReplyMessage || '';
+    };
 
-          <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 shadow-2xl border border-white/60 text-left max-w-3xl mx-auto text-slate-800">
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Affiliation</label>
-                <select id="filter-registry" onchange="window.renderMarketplaceHome()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none bg-slate-50 font-medium">
-                  <option value="all">All Responsible</option>
-                  <option value="dogsnz">Dogs NZ Certified Only</option>
-                  <option value="general">Verified Non-Pedigree</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Breed (Dogs NZ Catalog)</label>
-                <select id="filter-breed" onchange="window.renderMarketplaceHome()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none bg-slate-50 font-medium breed-select-catalog">
-                  <option value="all">All Breeds</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Location</label>
-                <select id="filter-region" onchange="window.renderMarketplaceHome()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none bg-slate-50 font-medium">
-                  <option value="all">All New Zealand</option>
-                  <option value="Auckland">Auckland</option>
-                  <option value="Waikato">Waikato</option>
-                  <option value="Bay of Plenty">Bay of Plenty</option>
-                  <option value="Hawke's Bay">Hawke's Bay</option>
-                  <option value="Taranaki">Taranaki</option>
-                  <option value="Manawatu-Whanganui">Manawatu-Whanganui</option>
-                  <option value="Wellington">Wellington</option>
-                  <option value="Nelson / Tasman">Nelson / Tasman</option>
-                  <option value="Marlborough">Marlborough</option>
-                  <option value="Canterbury">Canterbury</option>
-                  <option value="Otago">Otago</option>
-                  <option value="Southland">Southland</option>
-                </select>
-              </div>
-              <div class="flex items-end">
-                <button type="button" onclick="window.renderMarketplaceHome()" class="w-full py-2.5 rounded-xl gradient-accent text-white font-bold text-sm shadow hover:opacity-95 transition flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-magnifying-glass"></i>
-                  <span>Filter</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    window.saveSettings = async function() {
+      const btn = document.getElementById('btn-save-settings');
+      btn.innerText = "Saving Profile...";
+      btn.disabled = true;
 
-      <!-- Marketplace Listings Grid -->
-      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="font-display font-bold text-2xl text-brand-dark">Available Litters</h3>
-            <p class="text-xs text-slate-500">Published litters with documented health screenings and transparent waitlists</p>
-          </div>
-          <span class="text-xs font-bold text-brand-accent px-3 py-1 rounded-full bg-pink-100">
-            <i class="fa-solid fa-circle-check mr-1"></i> Verified Marketplace
-          </span>
-        </div>
-        <div id="public-marketplace-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      </section>
-    </div>
+      try {
+        let avatarUrl = document.getElementById('setting-avatar-url').value.trim();
+        const fileInput = document.getElementById('setting-avatar-file');
 
-    <!-- VIEW 2: DEDICATED LISTING DETAIL -->
-    <div id="view-listing-detail" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 hidden">
-      <button type="button" onclick="window.showPage('home')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center space-x-2">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span>Back to Marketplace</span>
-      </button>
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const uploaded = await uploadImageFile(fileInput.files[0], 'avatars');
+          if (uploaded) avatarUrl = uploaded;
+        }
 
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/60 shadow-xl space-y-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <div id="detail-badge-container" class="flex flex-wrap gap-2 mb-2"></div>
-            <h1 id="detail-title" class="font-display font-extrabold text-2xl sm:text-4xl text-brand-dark">Litter Name</h1>
-            <p class="text-xs text-slate-500 mt-1">
-              <i class="fa-solid fa-location-dot text-brand-accent mr-1"></i> <span id="detail-location">Location</span> · Listed by 
-              <strong id="detail-breeder" onclick="window.viewBreederProfile(window.activeBreederName)" class="text-brand-primary cursor-pointer hover:underline">Breeder</strong>
-            </p>
-          </div>
-          <div class="text-left md:text-right">
-            <p class="text-xs uppercase font-bold text-slate-400">Puppy Price</p>
-            <p id="detail-price" class="font-display text-3xl font-extrabold text-brand-accent">$0 NZD</p>
-          </div>
-        </div>
+        if (!avatarUrl) {
+          avatarUrl = window.appData.settings.avatar || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80";
+        }
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div class="lg:col-span-2 space-y-3">
-            <div class="relative h-80 sm:h-[460px] rounded-3xl overflow-hidden bg-slate-100 shadow-inner group">
-              <img id="detail-main-img" src="" class="w-full h-full object-cover transition duration-300">
-              <span id="detail-main-img-tag" class="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-extrabold bg-brand-dark/80 backdrop-blur-md text-white border border-white/20 hidden"></span>
-            </div>
-            <div id="detail-thumbnails-strip" class="flex space-x-3 overflow-x-auto pb-2 custom-scroll"></div>
-          </div>
+        window.appData.settings.kennelName = document.getElementById('setting-kennel-name').value;
+        window.appData.settings.regNumber = document.getElementById('setting-reg-number').value;
+        window.appData.settings.breeds = document.getElementById('setting-breeds').value;
+        window.appData.settings.location = document.getElementById('setting-location').value;
+        window.appData.settings.bio = document.getElementById('setting-bio').value;
+        window.appData.settings.avatar = avatarUrl;
+        document.getElementById('setting-avatar-preview').src = avatarUrl;
 
-          <div class="bg-brand-light/70 border border-brand-border/80 rounded-3xl p-6 space-y-4 shadow-sm">
-            <div class="flex items-center space-x-3 pb-3 border-b border-brand-border/60 cursor-pointer group" onclick="window.viewBreederProfile(window.activeBreederName)">
-              <img id="detail-breeder-avatar" src="" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow group-hover:scale-105 transition">
-              <div>
-                <h3 id="detail-breeder-name" class="font-bold text-sm text-brand-dark group-hover:text-brand-pink transition">Kennel Name</h3>
-                <p id="detail-breeder-location" class="text-xs text-slate-500">Location</p>
-                <span id="detail-breeder-badge" class="inline-block mt-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-dogsnz-blue text-dogsnz-gold">Verified</span>
-              </div>
-            </div>
+        window.saveData();
+        window.updateAuthUI();
+        window.showToast("Kennel profile and photo saved!");
+      } catch (err) {
+        alert("Error saving settings: " + err.message);
+      } finally {
+        btn.innerText = "Save Profile";
+        btn.disabled = false;
+      }
+    };
 
-            <p id="detail-breeder-bio" class="text-xs text-slate-600 leading-relaxed italic"></p>
+    window.saveAutoResponder = function() {
+      const userTier = window.appData.currentUser ? window.appData.currentUser.tier : '';
+      if (!userTier.includes('Premier') && !userTier.includes('Gold')) {
+        alert("The Automated Inquiry Sales Funnel is reserved for Premier / Gold Platinum tier accounts.");
+        return;
+      }
+      window.appData.settings.autoReplyEnabled = document.getElementById('auto-reply-enabled').checked;
+      window.appData.settings.autoReplyMessage = document.getElementById('auto-reply-text').value;
+      window.saveData();
+      window.showToast("Sales funnel auto-responder updated!");
+    };
 
-            <button type="button" onclick="window.viewBreederProfile(window.activeBreederName)" class="w-full py-2 rounded-xl border border-brand-primary/30 text-brand-primary hover:bg-brand-primary/10 text-xs font-bold transition flex items-center justify-center space-x-2">
-              <i class="fa-solid fa-id-badge"></i>
-              <span>View Kennel Profile & Active Dogs</span>
-            </button>
+    window.renderSubscriptionTiers = function() {
+      const currentTier = (window.appData.currentUser && window.appData.currentUser.tier) || "Verified Breeder";
+      const currentObj = window.appData.tiers.find(t => t.name === currentTier) || window.appData.tiers[1];
 
-            <div class="pt-2 border-t border-brand-border/60 space-y-2">
-              <h4 class="font-bold text-xs uppercase tracking-wider text-brand-dark">Send Message to Breeder</h4>
-              <form id="form-direct-breeder-inquire" onsubmit="window.handleDirectBreederMessage(event)" class="space-y-2">
-                <input type="text" id="direct-msg-name" required placeholder="Your Name" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none bg-white">
-                <input type="text" id="direct-msg-contact" required placeholder="Email or Phone" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none bg-white">
-                <textarea id="direct-msg-body" rows="3" required placeholder="Ask about this litter, visiting days, or puppy availability..." class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none bg-white"></textarea>
-                <button type="submit" class="w-full py-2.5 rounded-xl gradient-accent text-white font-bold text-xs shadow hover:opacity-95 transition flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-paper-plane text-xs"></i>
-                  <span>Send Direct Message</span>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+      document.getElementById('current-tier-title').innerText = currentObj.name;
+      document.getElementById('current-tier-comm').innerText = `${currentObj.commission}%`;
 
-        <!-- CONDITIONAL: Pedigree -->
-        <div id="section-pedigree" class="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4 hidden">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-              <i class="fa-solid fa-sitemap text-brand-primary text-lg"></i>
-              <h3 class="font-display font-bold text-lg text-brand-dark">Certified Pedigree Lineage</h3>
-            </div>
-            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-100 text-brand-primary">Dogs NZ Verified Lineage</span>
-          </div>
-          <div id="detail-pedigree-tree" class="overflow-x-auto text-xs"></div>
-        </div>
+      const grid = document.getElementById('breeder-tier-comparison-grid');
+      if (!grid) return;
 
-        <!-- CONDITIONAL: Health Clearances -->
-        <div id="section-health-clearances" class="bg-brand-light/60 border border-brand-border/70 rounded-3xl p-6 space-y-4 hidden">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
-              <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
-                <h3 class="font-display font-bold text-lg text-brand-dark">Breeder Health Clearances & Testing Records</h3>
-              </div>
-              <p class="text-xs text-slate-500">Documented biological screening by registered veterinarians and accredited laboratories.</p>
-            </div>
-            <button type="button" onclick="window.handleRequestPaperwork()" class="px-4 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow hover:opacity-95 transition flex items-center space-x-2">
-              <i class="fa-solid fa-file-shield"></i>
-              <span>Request Verified Paperwork</span>
-            </button>
-          </div>
-          <div id="detail-health-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2"></div>
-        </div>
+      const isDogsNZApproved = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';
 
-        <div class="space-y-4">
-          <h3 class="font-display font-bold text-lg text-brand-dark">Individual Puppies in This Litter</h3>
-          <div id="detail-puppies-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        </div>
-      </div>
-    </div>
+      grid.innerHTML = window.appData.tiers.map(t => {
+        const isActive = t.name === currentTier;
+        const isLockedDogsNZ = t.isDogsNZOnly && !isDogsNZApproved;
 
-    <!-- VIEW: PUBLIC BREEDER PROFILE -->
-    <div id="view-breeder-profile" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 hidden">
-      <button type="button" onclick="window.showPage('home')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center space-x-2">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span>Back to Marketplace</span>
-      </button>
-
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/60 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div class="flex items-center space-x-5">
-          <img id="bp-avatar" src="" class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover border-4 border-white shadow-md">
-          <div class="space-y-1">
-            <div id="bp-badges" class="flex flex-wrap gap-2"></div>
-            <h1 id="bp-name" class="font-display font-extrabold text-2xl sm:text-3xl text-brand-dark">Kennel Name</h1>
-            <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot text-brand-accent mr-1"></i> <span id="bp-location">Location</span> · Breeds: <strong id="bp-breeds" class="text-brand-primary">Breeds</strong></p>
-          </div>
-        </div>
-        <button type="button" onclick="window.showPage('buyer-approval')" class="px-5 py-3 rounded-2xl gradient-accent text-white font-bold text-xs shadow-md hover:opacity-95 transition flex items-center space-x-2">
-          <i class="fa-solid fa-shield-cat"></i>
-          <span>Apply to Waitlist</span>
-        </button>
-      </div>
-
-      <div class="bg-white rounded-3xl p-6 border border-brand-border/60 shadow-sm space-y-2">
-        <h3 class="font-display font-bold text-base text-brand-dark">About Our Kennel & Ethics</h3>
-        <p id="bp-bio" class="text-xs text-slate-600 leading-relaxed"></p>
-      </div>
-
-      <div class="space-y-3">
-        <h3 class="font-display font-bold text-lg text-brand-dark">Breeding Dogs Roster</h3>
-        <div id="bp-dogs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
-
-      <div class="space-y-3">
-        <h3 class="font-display font-bold text-lg text-brand-dark">Current Available Litters</h3>
-        <div id="bp-litters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      </div>
-
-      <div class="space-y-3">
-        <h3 class="font-display font-bold text-lg text-brand-dark">Upcoming Breeding Plans</h3>
-        <div id="bp-plans-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      </div>
-    </div>
-
-    <!-- VIEW 3: BREEDER DIRECTORY -->
-    <div id="view-public-directory" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6 hidden">
-      <div class="flex justify-between items-end border-b pb-4 border-brand-border/60">
-        <div>
-          <h2 class="font-display font-extrabold text-3xl text-brand-dark">New Zealand Breeder Directory</h2>
-          <p class="text-slate-500 text-sm">Directory of responsible New Zealand breeders with certified Dogs NZ pedigree members highlighted.</p>
-        </div>
-        <button type="button" onclick="window.openModal('modal-auth')" class="px-4 py-2 rounded-xl gradient-accent text-white font-bold text-xs">Register Kennel</button>
-      </div>
-      <div id="directory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-
-    <!-- VIEW 4: BUYER PRE-APPROVAL -->
-    <div id="view-public-apply" class="max-w-3xl mx-auto px-4 py-10 hidden">
-      <div class="bg-white rounded-3xl p-8 shadow-xl border border-brand-border/70 space-y-6">
-        <div class="text-center space-y-2">
-          <div class="w-12 h-12 gradient-accent text-white rounded-2xl flex items-center justify-center mx-auto text-xl shadow-md">
-            <i class="fa-solid fa-user-shield"></i>
-          </div>
-          <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-brand-dark">Verified Buyer Pre-Approval</h2>
-          <p class="text-xs text-slate-500 max-w-md mx-auto">Complete pre-screening once to receive priority placement on verified breeder waitlists across New Zealand.</p>
-        </div>
-
-        <form onsubmit="window.handleBuyerApplicationSubmit(event)" class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Full Legal Name</label>
-              <input type="text" id="buyer-app-name" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Email Address</label>
-              <input type="email" id="buyer-app-email" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
-            </div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Phone / Mobile</label>
-              <input type="tel" id="buyer-app-phone" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Region / City</label>
-              <input type="text" id="buyer-app-city" placeholder="e.g. Cambridge, Waikato" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Desired Breed (Dogs NZ Catalog)</label>
-            <select id="buyer-app-breed" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none breed-select-catalog"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Property & Yard Type</label>
-            <select id="buyer-app-property" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none">
-              <option>Own Home - Fully Fenced Large Yard (1.8m+ fencing)</option>
-              <option>Own Home - Fully Fenced Medium Courtyard</option>
-              <option>Rural Lifestyle Block / Farm (Secured home paddock)</option>
-              <option>Rental - Written Landlord Consent Provided</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Desired Routine & Dog Experience</label>
-            <textarea id="buyer-app-notes" rows="3" required placeholder="Tell breeders about your family, routine, and dog experience..." class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:border-brand-accent outline-none"></textarea>
-          </div>
-          <button type="submit" class="w-full py-3 rounded-2xl gradient-accent text-white font-bold text-sm shadow-lg hover:opacity-95 transition">
-            Submit Pre-Approval Application
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- VIEW 5: BREEDER SUITE (WORKSPACE) -->
-    <div id="view-breeder-suite" class="hidden">
-      <div class="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row">
-        
-        <!-- Sidebar Navigation -->
-        <aside class="w-full md:w-64 bg-brand-dark text-white flex-shrink-0 flex flex-col justify-between p-4 border-r border-white/10">
-          <div class="space-y-4">
-            <div class="pb-4 border-b border-white/10 flex items-center justify-between">
-              <div>
-                <h2 class="font-display font-extrabold text-lg text-white">Breeder Suite</h2>
-                <p id="sidebar-kennel-sub" class="text-[10px] text-pink-200/80 font-medium truncate max-w-[140px]">Highland Pedigrees</p>
-              </div>
-              <button type="button" onclick="window.showPage('home')" class="text-xs text-brand-pink font-bold hover:underline">Exit Store</button>
-            </div>
-
-            <nav class="space-y-1 text-sm font-medium">
-              <button type="button" onclick="window.navigateBreederTab('dash')" id="nav-dash" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition bg-white/15 text-white font-bold">
-                <i class="fa-solid fa-chart-pie w-5 text-brand-pink"></i><span>Dashboard</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('inbox')" id="nav-inbox" class="breeder-nav-btn w-full text-left flex items-center justify-between px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <div class="flex items-center space-x-3">
-                  <i class="fa-solid fa-comments w-5 text-brand-pink"></i><span>Messages</span>
-                </div>
-                <span id="inbox-unread-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-accent text-white hidden">0</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('notifications')" id="nav-notifications" class="breeder-nav-btn w-full text-left flex items-center justify-between px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <div class="flex items-center space-x-3">
-                  <i class="fa-solid fa-bell w-5 text-brand-pink"></i><span>Notifications</span>
-                </div>
-                <span id="notif-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-pink text-white hidden">0</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('dogs')" id="nav-dogs" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-paw w-5 text-brand-pink"></i><span>Breeding Stock</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('litters')" id="nav-litters" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-layer-group w-5 text-brand-pink"></i><span>Litters & Puppies</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('heat')" id="nav-heat" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-fire-flame-curved w-5 text-brand-pink"></i><span>Heat Cycles</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('buyers')" id="nav-buyers" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-users w-5 text-brand-pink"></i><span>Waitlist Buyers</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('dogsnz-portal')" id="nav-dogsnz-portal" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition border border-dogsnz-gold/40 bg-dogsnz-blue/40 text-dogsnz-gold font-bold">
-                <i class="fa-solid fa-award w-5 text-dogsnz-gold"></i><span>Dogs NZ Portal</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('finances')" id="nav-finances" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-wallet w-5 text-brand-pink"></i><span>Finances</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('subscriptions')" id="nav-subscriptions" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-id-card-clip w-5 text-brand-pink"></i><span>Subscriptions</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('settings')" id="nav-settings" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition text-pink-100/80 hover:bg-white/10">
-                <i class="fa-solid fa-sliders w-5 text-brand-pink"></i><span>Settings</span>
-              </button>
-              <button type="button" onclick="window.navigateBreederTab('admin')" id="nav-admin" class="breeder-nav-btn w-full text-left flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition border border-brand-pink/50 bg-brand-pink/15 text-brand-pink font-bold hidden">
-                <i class="fa-solid fa-user-shield w-5 text-brand-pink"></i><span>Admin Audit</span>
-              </button>
-            </nav>
-          </div>
-
-          <div class="pt-4 border-t border-white/10">
-            <button type="button" onclick="window.handleLogout()" class="w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-pink-200">
-              Sign Out
-            </button>
-          </div>
-        </aside>
-
-        <!-- Main Workspace View Panels -->
-        <main id="breeder-content-area" class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
-
-          <!-- DASHBOARD OVERVIEW -->
-          <section id="mod-dash" class="space-y-6">
-            <div class="gradient-plum rounded-3xl p-6 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold uppercase tracking-wider text-pink-200 inline-block mb-1">Breeder Control Center</span>
-                <h2 class="font-display font-extrabold text-2xl text-white"><span id="dash-kennel-name">My Kennel</span></h2>
-              </div>
-              <div class="flex space-x-2">
-                <button type="button" onclick="window.openAddLitterModal()" class="px-3.5 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs"><i class="fa-solid fa-paw mr-1"></i> Log Litter</button>
-                <button type="button" onclick="window.openAddDogModal()" class="px-3.5 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow"><i class="fa-solid fa-plus mr-1"></i> Add Dog</button>
-              </div>
-            </div>
-
-            <!-- Metrics Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div class="bg-white p-4 rounded-2xl border border-brand-border/60">
-                <p class="text-[10px] font-bold uppercase text-slate-400">Breeding Stock</p>
-                <p id="stat-total-dogs" class="text-2xl font-extrabold text-brand-dark">0</p>
-                <p class="text-[10px] text-slate-500"><span id="stat-active-dams">0</span> Dams · <span id="stat-active-sires">0</span> Sires</p>
-              </div>
-              <div class="bg-white p-4 rounded-2xl border border-brand-border/60">
-                <p class="text-[10px] font-bold uppercase text-slate-400">Active Litters</p>
-                <p id="stat-active-litters" class="text-2xl font-extrabold text-brand-dark">0</p>
-                <p id="stat-total-puppies" class="text-[10px] text-emerald-600 font-bold">0 Pups</p>
-              </div>
-              <div class="bg-white p-4 rounded-2xl border border-brand-border/60">
-                <p class="text-[10px] font-bold uppercase text-slate-400">Trust Deposits</p>
-                <p id="stat-escrow-held" class="text-2xl font-extrabold text-emerald-600">$0</p>
-                <p class="text-[10px] text-slate-500">Held in protection</p>
-              </div>
-              <div class="bg-white p-4 rounded-2xl border border-brand-border/60">
-                <p class="text-[10px] font-bold uppercase text-slate-400">Waitlist Buyers</p>
-                <p id="stat-waitlist-count" class="text-2xl font-extrabold text-brand-accent">0</p>
-                <p class="text-[10px] text-slate-500">Pre-screened leads</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div class="lg:col-span-2 bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3">
-                <div class="flex justify-between items-center">
-                  <h3 class="font-display font-bold text-sm text-brand-dark flex items-center space-x-2">
-                    <i class="fa-solid fa-layer-group text-brand-pink"></i>
-                    <span>Marketplace Active Litters</span>
-                  </h3>
-                  <button onclick="window.navigateBreederTab('litters')" class="text-xs font-bold text-brand-pink hover:underline">Manage All</button>
-                </div>
-                <div id="dash-live-litters-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-              </div>
-
-              <div class="bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3">
-                <div class="flex justify-between items-center">
-                  <h3 class="font-display font-bold text-sm text-brand-dark flex items-center space-x-2">
-                    <i class="fa-solid fa-fire-flame-curved text-brand-accent"></i>
-                    <span>Upcoming Heats</span>
-                  </h3>
-                  <button onclick="window.navigateBreederTab('heat')" class="text-xs font-bold text-brand-pink hover:underline">Log Heat</button>
-                </div>
-                <div id="dash-heats-list" class="space-y-2 max-h-56 overflow-y-auto custom-scroll"></div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div class="bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3">
-                <div class="flex items-center space-x-2">
-                  <i class="fa-solid fa-bullhorn text-brand-primary"></i>
-                  <h3 class="font-display font-bold text-sm text-brand-dark">Send Mass Update to Waitlist</h3>
-                </div>
-                <p class="text-xs text-slate-500">Broadcast pregnancy confirmation, whelping news, or photo updates directly to all waitlist buyers.</p>
-                <form onsubmit="window.handleMassWaitlistBroadcast(event)" class="space-y-2">
-                  <input type="text" id="mass-broadcast-subject" required placeholder="Subject: e.g. Ultrasound Confirmed! 5 Puppies Expected" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none">
-                  <textarea id="mass-broadcast-body" rows="3" required placeholder="Write your announcement update here..." class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none"></textarea>
-                  <button type="submit" class="px-4 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow hover:opacity-95 transition">
-                    <i class="fa-solid fa-paper-plane mr-1"></i> Send Announcement
-                  </button>
-                </form>
-              </div>
-
-              <div class="bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-list-check text-brand-accent"></i>
-                    <h3 class="font-display font-bold text-sm text-brand-dark">Breeder Tasks & Reminders</h3>
-                  </div>
-                  <span id="dash-task-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 tasks</span>
-                </div>
-                <form onsubmit="window.handleAddTask(event)" class="flex space-x-2">
-                  <input type="text" id="new-task-text" required placeholder="Add reminder..." class="flex-1 p-2 rounded-xl border border-slate-200 text-xs outline-none">
-                  <button type="submit" class="px-3 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs">+ Add</button>
-                </form>
-                <div id="dash-task-list" class="space-y-1.5 max-h-48 overflow-y-auto custom-scroll"></div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 2. INBOX / MESSAGES -->
-          <section id="mod-inbox" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="font-display font-bold text-2xl text-brand-dark">Communications & Inquiry Chat</h2>
-                <p class="text-xs text-slate-500">Directly message puppy buyers, waitlisted customers, and fellow verified breeders.</p>
-              </div>
-              <button type="button" onclick="window.openNewMessageModal()" class="px-4 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow">
-                <i class="fa-solid fa-paper-plane mr-1"></i> New Message
-              </button>
-            </div>
-            <div class="bg-white rounded-3xl shadow-sm border border-brand-border/60 overflow-hidden grid grid-cols-1 md:grid-cols-3 min-h-[500px]">
-              <div class="border-r border-slate-100 flex flex-col">
-                <div class="p-4 border-b border-slate-100 bg-brand-light/30">
-                  <input type="text" id="chat-search" oninput="window.renderConversationList()" placeholder="Filter conversations..." class="w-full p-2 rounded-xl border border-slate-200 text-xs outline-none bg-white">
-                </div>
-                <div id="chat-conversations-list" class="flex-1 overflow-y-auto divide-y divide-slate-100 custom-scroll"></div>
-              </div>
-              <div class="col-span-2 flex flex-col justify-between bg-slate-50/50">
-                <div id="chat-active-header" class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center text-brand-accent font-bold">
-                      <i class="fa-solid fa-user"></i>
-                    </div>
-                    <div>
-                      <h4 id="chat-active-name" class="font-bold text-sm text-brand-dark">Select a Conversation</h4>
-                      <p id="chat-active-role" class="text-[11px] text-slate-500">No active thread</p>
-                    </div>
-                  </div>
-                  <span id="chat-active-tag" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-light text-brand-primary">Direct Thread</span>
-                </div>
-                <div id="chat-messages-area" class="p-5 flex-1 overflow-y-auto space-y-3 custom-scroll flex flex-col">
-                  <div class="text-center py-16 text-slate-400 text-xs">Select a contact or customer from the left to start chatting.</div>
-                </div>
-                <form id="chat-reply-form" onsubmit="window.handleSendChatMessage(event)" class="p-3 bg-white border-t border-slate-200 flex space-x-2">
-                  <input type="text" id="chat-reply-input" placeholder="Type your response..." class="flex-1 p-2.5 rounded-xl border border-slate-200 text-xs focus:border-brand-accent outline-none">
-                  <button type="submit" class="px-5 py-2.5 gradient-accent text-white font-bold rounded-xl text-xs shadow">Send</button>
-                </form>
-              </div>
-            </div>
-          </section>
-
-          <!-- 3. NOTIFICATIONS TAB -->
-          <section id="mod-notifications" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="font-display font-bold text-2xl text-brand-dark">Kennel Notifications</h2>
-                <p class="text-xs text-slate-500">Alerts for paperwork clearance requests, deposit locks, and new waitlist applications.</p>
-              </div>
-              <button type="button" onclick="window.markAllNotificationsRead()" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
-                Mark All Read
-              </button>
-            </div>
-            <div id="notifications-container" class="space-y-3"></div>
-          </section>
-
-          <!-- 4. BREEDING STOCK ROSTER -->
-          <section id="mod-dogs" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="font-display font-bold text-2xl text-brand-dark">Breeding Dogs Roster</h2>
-                <p class="text-xs text-slate-500">Edit dog profiles, update images, configure 3-generation pedigrees, and attach official certificates.</p>
-              </div>
-              <button type="button" onclick="window.openAddDogModal()" class="px-4 py-2 rounded-xl gradient-accent text-white font-semibold text-xs shadow">
-                <i class="fa-solid fa-plus mr-1"></i> Add Dog
-              </button>
-            </div>
-            <div id="dogs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-          </section>
-
-          <!-- 5. LITTERS & INDIVIDUAL PUPPIES -->
-          <section id="mod-litters" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="font-display font-bold text-2xl text-brand-dark">Litters & Individual Puppies</h2>
-                <p class="text-xs text-slate-500">Edit litter details, toggle marketplace publishing, manage puppies, and log growth updates.</p>
-              </div>
-              <button type="button" onclick="window.openAddLitterModal()" class="px-4 py-2 rounded-xl gradient-accent text-white font-semibold text-xs shadow">
-                <i class="fa-solid fa-plus mr-1"></i> Log Litter
-              </button>
-            </div>
-            <div id="litters-list" class="space-y-6"></div>
-          </section>
-
-          <!-- 6. HEAT CYCLES -->
-          <section id="mod-heat" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-fire-flame-curved text-brand-accent text-2xl"></i>
+        return `
+          <div class="bg-white rounded-3xl p-5 border ${isActive ? 'border-2 border-brand-pink shadow-xl ring-2 ring-brand-pink/20' : (t.isDogsNZOnly ? 'border-dogsnz-gold/60 shadow-sm' : 'border-brand-border/60 shadow-sm')} flex flex-col justify-between space-y-5">
+            <div class="space-y-3">
+              <div class="flex justify-between items-start">
                 <div>
-                  <h2 class="font-display font-bold text-2xl text-brand-dark">Heat Cycles & Breeding Logs</h2>
-                  <p class="text-xs text-slate-500">Calculates estimated 63-day gestation and whelping timeline.</p>
+                  <h4 class="font-display font-extrabold text-lg ${t.isDogsNZOnly ? 'text-dogsnz-blue' : 'text-brand-dark'}">${t.name}</h4>
+                  <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${t.desc}</p>
                 </div>
+                ${isActive ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-pink text-white uppercase tracking-wider">Active</span>` : ''}
+                ${t.isDogsNZOnly ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-dogsnz-gold text-dogsnz-blue uppercase">Manual Audit</span>` : ''}
               </div>
-              <button type="button" onclick="window.openAddHeatModal()" class="px-4 py-2 rounded-xl gradient-accent text-white font-semibold text-xs shadow">
-                <i class="fa-solid fa-plus mr-1"></i> Log Heat Cycle
-              </button>
-            </div>
-            <div id="heat-logs-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-          </section>
 
-          <!-- 7. DOGS NZ SPECIAL VERIFICATION PORTAL -->
-          <section id="mod-dogsnz-portal" class="space-y-6 hidden">
-            <div class="bg-gradient-to-r from-dogsnz-blue via-[#10436d] to-[#1c5d94] text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-3">
+              <div>
+                <span class="font-display text-3xl font-extrabold text-brand-dark">$${t.price}</span>
+                <span class="text-xs text-slate-400 font-bold"> NZD / mo</span>
+                ${t.annualPrice ? `<span class="block text-[10px] text-emerald-600 font-bold">or $${t.annualPrice}/yr (Save 20%)</span>` : ''}
+              </div>
+
+              <div class="p-2.5 rounded-xl ${t.isDogsNZOnly ? 'bg-dogsnz-light border border-dogsnz-gold/40' : 'bg-brand-light/60 border border-brand-border/50'} text-xs text-slate-700">
+                <span class="block text-[9px] uppercase font-bold text-slate-400">Trust Placement Fee</span>
+                <strong class="text-sm font-extrabold ${t.isDogsNZOnly ? 'text-dogsnz-blue' : 'text-emerald-600'}">${t.commission}%</strong> per homed pup
+              </div>
+
+              <ul class="space-y-2 text-xs text-slate-600 pt-1">
+                ${t.features.map(f => `
+                  <li class="flex items-start space-x-1.5">
+                    <i class="fa-solid fa-circle-check ${t.isDogsNZOnly ? 'text-dogsnz-blue' : 'text-brand-accent'} text-xs mt-0.5"></i>
+                    <span class="text-[11px] leading-tight">${f}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            ${isLockedDogsNZ ? `
+              <button type="button" onclick="window.navigateBreederTab('dogsnz-portal')" class="w-full py-2.5 rounded-2xl font-bold text-xs bg-dogsnz-blue text-dogsnz-gold shadow hover:opacity-95">
+                <i class="fa-solid fa-lock mr-1"></i> Verify Dogs NZ Credentials
+              </button>
+            ` : `
+              <button type="button" onclick="window.openSubscriptionCheckout('${t.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition ${isActive ? 'bg-slate-100 text-slate-400 cursor-default' : 'gradient-accent text-white shadow-lg hover:opacity-95'}">
+                ${isActive ? 'Current Plan' : `Upgrade to ${t.name}`}
+              </button>
+            `}
+          </div>
+        `;
+      }).join('');
+    };
+
+    window.openSubscriptionCheckout = function(tierId) {
+      const tier = window.appData.tiers.find(t => t.id === tierId);
+      if (!tier) return;
+
+      pendingCheckoutTier = tier;
+      document.getElementById('sub-card-email').value = window.appData.currentUser ? window.appData.currentUser.email : '';
+      document.getElementById('sub-checkout-summary').innerHTML = `
+        <div class="flex justify-between"><span>Selected Plan:</span><strong>${tier.name}</strong></div>
+        <div class="flex justify-between"><span>Recurring Rate:</span><strong>$${tier.price}.00 NZD / month</strong></div>
+        <div class="flex justify-between border-t border-brand-border/60 pt-2 text-brand-dark font-bold">
+          <span>Due Now:</span><span class="text-emerald-700 font-extrabold">$${tier.price}.00 NZD</span>
+        </div>
+      `;
+      window.openModal('modal-subscription-checkout');
+    };
+
+    window.handleConfirmSubscriptionPayment = function(e) {
+      e.preventDefault();
+      if (!pendingCheckoutTier) return;
+
+      if (!window.appData.currentUser) {
+        window.appData.currentUser = { id: 'usr-guest', email: document.getElementById('sub-card-email').value, role: 'breeder' };
+      }
+
+      window.appData.currentUser.tier = pendingCheckoutTier.name;
+
+      if (pendingCheckoutTier.price > 0) {
+        window.appData.finances.unshift({
+          id: 'fin-' + Date.now(),
+          type: 'Expense',
+          amount: pendingCheckoutTier.price,
+          category: 'Software Subscription',
+          desc: `WellBred NZ ${pendingCheckoutTier.name} Membership`,
+          date: new Date().toISOString().split('T')[0]
+        });
+      }
+
+      window.closeModal('modal-subscription-checkout');
+      window.saveData();
+      window.showToast(`Upgraded to ${pendingCheckoutTier.name}!`, 'fa-circle-check');
+      window.renderSubscriptionTiers();
+    };
+
+    window.openAddDogModal = function() {
+      document.getElementById('form-dog').reset();
+      document.getElementById('dog-edit-id').value = '';
+      document.getElementById('modal-dog-title').innerText = "Register Breeding Dog";
+      window.openModal('modal-dog-form');
+    };
+
+    window.openEditDogModal = function(dogId) {
+      const dog = window.appData.dogs.find(d => d.id === dogId);
+      if (!dog) return;
+      document.getElementById('dog-edit-id').value = dog.id;
+      document.getElementById('dog-name').value = dog.name;
+      document.getElementById('dog-callname').value = dog.callName || dog.call_name;
+      document.getElementById('dog-role').value = dog.role;
+      document.getElementById('dog-breed').value = dog.breed;
+      document.getElementById('dog-dob').value = dog.dob;
+      document.getElementById('dog-pedigree-sire').value = dog.pedigreeSire || '';
+      document.getElementById('dog-pedigree-dam').value = dog.pedigreeDam || '';
+      document.getElementById('dog-photo-url').value = dog.photo;
+      document.getElementById('dog-health').value = dog.health;
+      document.getElementById('modal-dog-title').innerText = `Edit: ${dog.callName || dog.name}`;
+      window.openModal('modal-dog-form');
+    };
+
+    window.deleteDog = function(dogId) {
+      if (confirm("Delete this dog profile?")) {
+        window.appData.dogs = window.appData.dogs.filter(d => d.id !== dogId);
+        window.saveData();
+        window.showToast("Dog deleted.");
+      }
+    };
+
+    window.handleDogFormSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btn-save-dog');
+      saveBtn.innerText = "Saving Profile...";
+      saveBtn.disabled = true;
+
+      try {
+        const editId = document.getElementById('dog-edit-id').value;
+        let photoUrl = document.getElementById('dog-photo-url').value.trim();
+        const fileInput = document.getElementById('dog-photo-file');
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const up = await uploadImageFile(fileInput.files[0], 'dogs');
+          if (up) photoUrl = up;
+        }
+
+        if (!photoUrl && editId) {
+          const existing = window.appData.dogs.find(d => d.id === editId);
+          if (existing) photoUrl = existing.photo;
+        }
+        if (!photoUrl) photoUrl = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1';
+
+        const payload = {
+          name: document.getElementById('dog-name').value,
+          call_name: document.getElementById('dog-callname').value,
+          callName: document.getElementById('dog-callname').value,
+          role: document.getElementById('dog-role').value,
+          breed: document.getElementById('dog-breed').value,
+          dob: document.getElementById('dog-dob').value,
+          photo: photoUrl,
+          health: document.getElementById('dog-health').value,
+          pedigreeSire: document.getElementById('dog-pedigree-sire').value,
+          pedigreeDam: document.getElementById('dog-pedigree-dam').value,
+          owner_id: window.appData.currentUser ? window.appData.currentUser.id : 'guest'
+        };
+
+        if (editId) {
+          const dog = window.appData.dogs.find(d => d.id === editId);
+          if (dog) Object.assign(dog, payload);
+
+          if (window.supabaseClient && !editId.startsWith('dog-')) {
+            await window.supabaseClient.from('dogs').update({
+              name: payload.name,
+              call_name: payload.call_name,
+              role: payload.role,
+              breed: payload.breed,
+              dob: payload.dob,
+              photo: payload.photo,
+              health: payload.health,
+              pedigree_sire: payload.pedigreeSire,
+              pedigree_dam: payload.pedigreeDam
+            }).eq('id', editId);
+          }
+        } else {
+          let assignedId = 'dog-' + Date.now();
+          if (window.supabaseClient && window.appData.currentUser) {
+            const { data } = await window.supabaseClient.from('dogs').insert({
+              name: payload.name,
+              call_name: payload.call_name,
+              role: payload.role,
+              breed: payload.breed,
+              dob: payload.dob,
+              photo: payload.photo,
+              health: payload.health,
+              pedigree_sire: payload.pedigreeSire,
+              pedigree_dam: payload.pedigreeDam,
+              owner_id: window.appData.currentUser.id
+            }).select().single();
+            if (data) assignedId = data.id;
+          }
+          window.appData.dogs.push({ id: assignedId, ...payload });
+        }
+
+        window.saveData();
+        window.closeModal('modal-dog-form');
+        window.showToast("Dog profile saved & persisted!");
+      } catch (err) {
+        alert("Save error: " + err.message);
+      } finally {
+        saveBtn.innerText = "Save Dog";
+        saveBtn.disabled = false;
+      }
+    };
+
+    window.openAddFinanceModal = function() {
+      document.getElementById('form-finance').reset();
+      document.getElementById('fin-date').value = new Date().toISOString().split('T')[0];
+      window.openModal('modal-finance-form');
+    };
+
+    window.handleFinanceFormSubmit = function(e) {
+      e.preventDefault();
+      const newTx = {
+        id: 'fin-' + Date.now(),
+        type: document.getElementById('fin-type').value,
+        amount: Number(document.getElementById('fin-amount').value),
+        category: document.getElementById('fin-cat').value,
+        desc: document.getElementById('fin-desc').value,
+        date: document.getElementById('fin-date').value
+      };
+      window.appData.finances.unshift(newTx);
+      window.saveData();
+      window.closeModal('modal-finance-form');
+      window.showToast("Transaction logged into ledger!");
+    };
+
+    window.openAddHeatModal = function() {
+      document.getElementById('form-heat').reset();
+      document.getElementById('heat-start-date').value = new Date().toISOString().split('T')[0];
+      window.openModal('modal-heat-form');
+    };
+
+    window.handleHeatFormSubmit = function(e) {
+      e.preventDefault();
+      const dam = window.appData.dogs.find(d => d.id === document.getElementById('heat-dam-select').value);
+      const start = document.getElementById('heat-start-date').value;
+      const mating = document.getElementById('heat-mating-date').value;
+      let whelp = '';
+      if (mating) {
+        const d = new Date(mating);
+        d.setDate(d.getDate() + 63);
+        whelp = d.toISOString().split('T')[0];
+      }
+      window.appData.heatLogs.unshift({
+        id: 'h-' + Date.now(),
+        damName: dam ? dam.callName : 'Dam',
+        startDate: start,
+        matingDate: mating,
+        estWhelp: whelp
+      });
+      window.saveData();
+      window.closeModal('modal-heat-form');
+      window.showToast("Heat cycle logged successfully!");
+    };
+
+    window.openAddBuyerModal = function() {
+      document.getElementById('form-buyer').reset();
+      window.openModal('modal-buyer-form');
+    };
+
+    window.handleBuyerFormSubmit = function(e) {
+      e.preventDefault();
+      window.appData.buyers.unshift({
+        id: 'b-' + Date.now(),
+        name: document.getElementById('buyer-name').value,
+        contact: document.getElementById('buyer-contact').value,
+        pref: `[Breed: ${document.getElementById('buyer-form-breed').value}] ${document.getElementById('buyer-pref').value}`,
+        date: new Date().toLocaleDateString()
+      });
+      window.saveData();
+      window.closeModal('modal-buyer-form');
+      window.showToast("Waitlist buyer added to priority registry!");
+    };
+
+    window.handleBuyerApplicationSubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('buyer-app-name').value;
+      const email = document.getElementById('buyer-app-email').value;
+      const phone = document.getElementById('buyer-app-phone').value;
+      const city = document.getElementById('buyer-app-city').value;
+      const breed = document.getElementById('buyer-app-breed').value;
+      const prop = document.getElementById('buyer-app-property').value;
+      const notes = document.getElementById('buyer-app-notes').value;
+
+      window.appData.buyers.unshift({
+        id: 'b-' + Date.now(),
+        name: name,
+        contact: `${phone} / ${email} (${city})`,
+        deposit: 0,
+        pref: `[${breed}] ${prop} - ${notes}`,
+        verifiedProperty: true,
+        date: new Date().toLocaleDateString()
+      });
+
+      window.saveData();
+      window.showToast("Pre-Approval Application Approved! Added to priority registry with #1 Queue Status.");
+      e.target.reset();
+      window.showPage('home');
+    };
+
+    window.openAddLitterModal = function() {
+      document.getElementById('form-litter').reset();
+      document.getElementById('litter-edit-id').value = '';
+      document.getElementById('modal-litter-title').innerText = "Register Litter";
+      window.openModal('modal-litter-form');
+    };
+
+    window.openEditLitterModal = function(litterId) {
+      const litter = window.appData.litters.find(l => l.id === litterId);
+      if (!litter) return;
+
+      document.getElementById('litter-edit-id').value = litter.id;
+      document.getElementById('litter-name').value = litter.name || '';
+      document.getElementById('litter-dob').value = litter.dob || '';
+      document.getElementById('litter-ready-date').value = litter.readyDate || '';
+      document.getElementById('litter-price').value = litter.price || 3500;
+      document.getElementById('litter-breed').value = litter.breed || '';
+      document.getElementById('litter-photo').value = (litter.gallery && litter.gallery[0]) || '';
+      document.getElementById('litter-desc').value = litter.description || '';
+      document.getElementById('modal-litter-title').innerText = `Edit: ${litter.name}`;
+      window.openModal('modal-litter-form');
+    };
+
+    window.togglePublishLitter = function(litterId) {
+      const litter = window.appData.litters.find(l => l.id === litterId);
+      if (litter) {
+        litter.isPublished = !litter.isPublished;
+        window.saveData();
+        window.showToast(litter.isPublished ? "Litter is now LIVE on Marketplace!" : "Litter unpublished from Marketplace.");
+      }
+    };
+
+    window.deleteLitter = function(litterId) {
+      if (confirm("Delete this litter and its puppy profiles?")) {
+        window.appData.litters = window.appData.litters.filter(l => l.id !== litterId);
+        window.saveData();
+        window.showToast("Litter removed.");
+      }
+    };
+
+    window.handleLitterFormSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btn-save-litter');
+      saveBtn.innerText = "Saving Litter...";
+      saveBtn.disabled = true;
+
+      try {
+        const editId = document.getElementById('litter-edit-id').value;
+        let photo = document.getElementById('litter-photo').value.trim();
+        const fileInput = document.getElementById('litter-photo-file');
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const uploaded = await uploadImageFile(fileInput.files[0], 'litters');
+          if (uploaded) photo = uploaded;
+        }
+
+        if (!photo && editId) {
+          const existing = window.appData.litters.find(l => l.id === editId);
+          if (existing && existing.gallery && existing.gallery[0]) photo = existing.gallery[0];
+        }
+
+        if (!photo) photo = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80';
+
+        const isDNZ = window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved';
+
+        const payload = {
+          name: document.getElementById('litter-name').value,
+          dob: document.getElementById('litter-dob').value,
+          readyDate: document.getElementById('litter-ready-date').value,
+          price: Number(document.getElementById('litter-price').value),
+          breed: document.getElementById('litter-breed').value,
+          location: window.appData.settings.location,
+          breederName: window.appData.settings.kennelName,
+          breederBio: window.appData.settings.bio,
+          breederAvatar: window.appData.settings.avatar,
+          isDogsNZ: isDNZ,
+          dogsNZPrefix: isDNZ ? window.appData.dogsNZCredentials.prefix : '',
+          description: document.getElementById('litter-desc').value,
+          owner_id: window.appData.currentUser ? window.appData.currentUser.id : 'guest',
+          gallery: [photo]
+        };
+
+        if (editId) {
+          const litter = window.appData.litters.find(l => l.id === editId);
+          if (litter) Object.assign(litter, payload);
+        } else {
+          window.appData.litters.push({
+            id: 'litter-' + Date.now(),
+            ...payload,
+            isPublished: true,
+            puppies: []
+          });
+        }
+
+        window.saveData();
+        window.closeModal('modal-litter-form');
+        window.showToast("Litter saved successfully!");
+      } catch (err) {
+        alert("Litter save error: " + err.message);
+      } finally {
+        saveBtn.innerText = "Save Litter";
+        saveBtn.disabled = false;
+      }
+    };
+
+    window.handleDirectBreederMessage = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('direct-msg-name').value.trim();
+      const contact = document.getElementById('direct-msg-contact').value.trim();
+      const body = document.getElementById('direct-msg-body').value.trim();
+
+      const senderLabel = `${name} (${contact})`;
+      let conv = window.appData.conversations.find(c => c.contact === senderLabel);
+      if (!conv) {
+        conv = { contact: senderLabel, role: 'Marketplace Lead', unread: 1, messages: [] };
+        window.appData.conversations.push(conv);
+      } else {
+        conv.unread += 1;
+      }
+
+      conv.messages.push({
+        sender: 'them',
+        text: body,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      window.appData.notifications.unshift({
+        id: 'n-' + Date.now(),
+        type: 'inquiry',
+        title: `Message from ${name}`,
+        msg: `"${body.substring(0, 60)}..."`,
+        date: new Date().toLocaleDateString(),
+        read: false
+      });
+
+      window.saveData();
+      e.target.reset();
+      window.showToast("Message sent directly to the breeder!", "fa-paper-plane");
+    };
+
+    window.viewBreederProfile = function(breederName) {
+      const allLitters = [...window.publicMarketplaceLitters, ...window.appData.litters];
+      const breederLitters = allLitters.filter(l => l.breederName === breederName);
+      const isCurrent = window.appData.settings.kennelName === breederName;
+
+      const name = breederName;
+      const location = isCurrent ? window.appData.settings.location : (breederLitters[0]?.location || "New Zealand");
+      const breeds = isCurrent ? window.appData.settings.breeds : (breederLitters[0]?.breed || "Pedigree Breeds");
+      const bio = isCurrent ? window.appData.settings.bio : (breederLitters[0]?.breederBio || "Ethical registered preservation breeder.");
+      const avatar = isCurrent ? window.appData.settings.avatar : (breederLitters[0]?.breederAvatar || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80");
+      const isDogsNZ = isCurrent ? (window.appData.dogsNZCredentials?.status === 'approved') : (breederLitters[0]?.isDogsNZ);
+
+      document.getElementById('bp-avatar').src = avatar;
+      document.getElementById('bp-name').innerText = name;
+      document.getElementById('bp-location').innerText = location;
+      document.getElementById('bp-breeds').innerText = breeds;
+      document.getElementById('bp-bio').innerText = bio;
+
+      document.getElementById('bp-badges').innerHTML = `
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-brand-accent">Verified Breeder</span>
+        ${isDogsNZ ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold"><i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix</span>' : ''}
+      `;
+
+      const dogs = isCurrent ? window.appData.dogs : [
+        { callName: "Baron", name: "Ch. Silver Baron NZ", role: "Sire", breed: breeds, photo: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=300&q=80", health: "DNA Clear / OFA Hips Good" },
+        { callName: "Sierra", name: "Highland Sweet Sierra", role: "Dam", breed: breeds, photo: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80", health: "Full Genetic Panel Clear" }
+      ];
+
+      document.getElementById('bp-dogs-grid').innerHTML = dogs.map(d => `
+        <div class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm flex items-center space-x-3">
+          <img src="${d.photo}" class="w-16 h-16 rounded-xl object-cover">
+          <div>
+            <h4 class="font-bold text-xs text-brand-dark">${d.callName} (${d.role})</h4>
+            <p class="text-[11px] text-slate-500">${d.name}</p>
+            <span class="text-[9px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block mt-1">${d.health || 'Health Cleared'}</span>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('bp-litters-grid').innerHTML = breederLitters.length ? breederLitters.map(l => `
+        <div onclick="window.viewListingDetail('${l.id}')" class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition">
+          <img src="${l.gallery?.[0] || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'}" class="w-16 h-16 rounded-xl object-cover">
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-xs text-brand-dark truncate">${l.name}</h4>
+            <p class="text-[11px] text-slate-500">$${l.price} NZD · Ready: ${l.readyDate || 'Soon'}</p>
+            <span class="text-[9px] font-bold text-brand-pink hover:underline mt-1 block">View Available Puppies →</span>
+          </div>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-400 py-2">No active litters at this time.</p>';
+
+      const plans = isCurrent ? window.appData.heatLogs : [
+        { damName: "Sierra", estWhelp: "2026-12-05", breed: breeds }
+      ];
+
+      document.getElementById('bp-plans-grid').innerHTML = plans.length ? plans.map(p => `
+        <div class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-[9px] font-bold uppercase text-brand-accent tracking-wider">Planned Mating</span>
+            <h4 class="font-bold text-xs text-brand-dark mt-0.5">${p.damName} (${breeds})</h4>
+            <p class="text-[11px] text-slate-500">Expected Whelp: <strong>${p.estWhelp || 'Summer 2026'}</strong></p>
+          </div>
+          <button onclick="window.showPage('buyer-approval')" class="px-3 py-1.5 rounded-xl bg-brand-light text-brand-primary text-xs font-bold hover:bg-brand-pink/20 transition">Join Waitlist</button>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-400 py-2">No upcoming breedings scheduled.</p>';
+
+      document.getElementById('view-public-home').classList.add('hidden');
+      document.getElementById('view-listing-detail').classList.add('hidden');
+      document.getElementById('view-breeder-suite').classList.add('hidden');
+      document.getElementById('view-breeder-profile').classList.remove('hidden');
+      window.scrollTo(0, 0);
+    };
+
+    window.renderAllModules = function() {
+      const myDogs = window.appData.dogs || [];
+      const myLitters = window.appData.litters || [];
+      const myFinances = window.appData.finances || [];
+      const myHeats = window.appData.heatLogs || [];
+      const myBuyers = window.appData.buyers || [];
+
+      document.getElementById('dash-kennel-name').innerText = window.appData.settings.kennelName;
+      document.getElementById('stat-total-dogs').innerText = myDogs.length;
+      document.getElementById('stat-active-dams').innerText = myDogs.filter(d => d.role === 'Dam').length;
+      document.getElementById('stat-active-sires').innerText = myDogs.filter(d => d.role === 'Sire').length;
+      document.getElementById('stat-active-litters').innerText = myLitters.filter(l => l.isPublished).length;
+
+      let totalPups = 0;
+      myLitters.forEach(l => totalPups += (l.puppies || []).length);
+      document.getElementById('stat-total-puppies').innerText = `${totalPups} Puppies`;
+      document.getElementById('stat-waitlist-count').innerText = myBuyers.length;
+
+      const littersList = document.getElementById('litters-list');
+      if (littersList) {
+        littersList.innerHTML = myLitters.map(l => `
+          <div class="bg-white rounded-3xl p-6 border border-brand-border/60 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
               <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-dogsnz-gold text-2xl border border-dogsnz-gold/40">
-                  <i class="fa-solid fa-award"></i>
-                </div>
+                <img src="${(l.gallery && l.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80'}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 shadow-sm">
                 <div>
-                  <span class="px-2.5 py-0.5 rounded-full bg-dogsnz-gold text-dogsnz-blue text-[10px] font-extrabold uppercase">Official Verification</span>
-                  <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white">Dogs New Zealand Breeder Portal</h2>
+                  <h4 class="font-bold text-lg text-brand-dark">${l.name}</h4>
+                  <p class="text-xs text-slate-500">Whelp: ${l.dob} · $${l.price} NZD</p>
+                  <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${l.isPublished ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}">
+                    ${l.isPublished ? 'Live on Marketplace' : 'Unpublished (Draft)'}
+                  </span>
                 </div>
               </div>
-              <p class="text-blue-100 text-xs sm:text-sm max-w-2xl">Submit official registration certificates and membership ID to unlock certified pedigree badges.</p>
-            </div>
-            <div class="bg-white rounded-3xl p-6 border border-brand-border/60 shadow-sm space-y-4">
-              <div class="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div>
-                  <h3 class="font-bold text-base text-brand-dark">Your Dogs NZ Credentials Status</h3>
-                  <p class="text-xs text-slate-500">Requires manual administrative review of official certificates and membership card.</p>
-                </div>
-                <div id="dogsnz-status-badge"></div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="window.togglePublishLitter('${l.id}')" class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50 transition">
+                  ${l.isPublished ? '<i class="fa-solid fa-eye-slash mr-1"></i> Unpublish' : '<i class="fa-solid fa-globe mr-1"></i> Publish Live'}
+                </button>
+                <button onclick="window.openEditLitterModal('${l.id}')" class="px-3.5 py-2 rounded-xl bg-brand-light text-brand-dark font-bold text-xs hover:bg-brand-pink/20 transition">
+                  <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                </button>
+                <button onclick="window.openAddPuppyModal('${l.id}')" class="px-3.5 py-2 gradient-accent text-white font-bold text-xs rounded-xl shadow">+ Add Pup</button>
+                <button onclick="window.deleteLitter('${l.id}')" class="p-2 text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button>
               </div>
-              <form id="form-dogsnz-portal" onsubmit="window.handleDogsNZSubmit(event)" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Dogs NZ Membership Number</label>
-                    <input type="text" id="dogsnz-mem-num" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="e.g. 098452">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Registered Kennel Prefix</label>
-                    <input type="text" id="dogsnz-prefix" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="e.g. HIGHLAND">
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Affiliated Breed Club</label>
-                    <input type="text" id="dogsnz-club" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="e.g. Central Golden Retriever Club">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Upload Certificate (PDF/Photo)</label>
-                    <input type="file" id="dogsnz-cert-file" accept="image/*,application/pdf" class="w-full p-2 border border-slate-200 rounded-xl text-xs text-slate-600">
-                  </div>
-                </div>
-                <div class="pt-2 flex justify-end">
-                  <button type="submit" id="btn-submit-dogsnz" class="px-6 py-2.5 rounded-xl bg-dogsnz-blue text-white font-bold text-xs shadow transition">
-                    Submit Credentials for Manual Review
-                  </button>
-                </div>
-              </form>
             </div>
-          </section>
 
-          <!-- 8. WAITLIST BUYERS -->
-          <section id="mod-buyers" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="font-display font-bold text-2xl text-brand-dark">Waitlist Priority Registry</h2>
-                <p class="text-xs text-slate-500">Pre-screened applicants with verified yard fencing, home ownership, and queue positions.</p>
-              </div>
-              <button type="button" onclick="window.openAddBuyerModal()" class="px-4 py-2 rounded-xl gradient-accent text-white font-semibold text-xs shadow">
-                <i class="fa-solid fa-plus mr-1"></i> Add Waitlist Buyer
-              </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              ${(l.puppies || []).map(p => `
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center space-x-3">
+                  <img src="${p.photo || (l.gallery && l.gallery[0])}" class="w-12 h-12 rounded-xl object-cover border border-slate-200">
+                  <div class="flex-1 min-w-0 text-xs">
+                    <p class="font-bold text-brand-dark truncate">${p.identifier}</p>
+                    <p class="text-slate-500 text-[11px]">${p.gender} · $${p.price}</p>
+                    <span class="text-[9px] font-bold ${p.status === 'Available' ? 'text-emerald-600' : 'text-slate-400'}">${p.status}</span>
+                  </div>
+                </div>
+              `).join('')}
             </div>
-            <div id="buyers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-          </section>
+          </div>
+        `).join('');
+      }
 
-          <!-- 9. FINANCES -->
-          <section id="mod-finances" class="space-y-6 hidden">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="font-display font-bold text-2xl text-brand-dark">Finances & Holding Deposits Ledger</h2>
-                <p class="text-xs text-slate-500">Track incoming puppy holding deposits and breeding operations ledger.</p>
-              </div>
-              <button type="button" onclick="window.openAddFinanceModal()" class="px-4 py-2 rounded-xl gradient-accent text-white font-semibold text-xs shadow">
-                <i class="fa-solid fa-plus mr-1"></i> Add Transaction
-              </button>
-            </div>
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-brand-border/60 overflow-x-auto">
-              <table class="w-full text-left text-sm text-slate-600">
-                <thead class="bg-brand-light text-brand-dark font-display font-bold text-xs uppercase border-b border-brand-border">
-                  <tr>
-                    <th class="p-3">Date</th>
-                    <th class="p-3">Category</th>
-                    <th class="p-3">Description</th>
-                    <th class="p-3">Type</th>
-                    <th class="p-3 text-right">Amount (NZD)</th>
-                  </tr>
-                </thead>
-                <tbody id="finance-table-body" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- 10. RESTORED SUBSCRIPTIONS MATRIX WITH STRIPE CHECKOUT -->
-          <section id="mod-subscriptions" class="space-y-6 hidden">
+      const dogsGrid = document.getElementById('dogs-grid');
+      if (dogsGrid) {
+        dogsGrid.innerHTML = myDogs.map(d => `
+          <div class="bg-white rounded-3xl p-5 border border-brand-border/60 shadow-sm space-y-3 flex flex-col justify-between">
             <div>
-              <h2 class="font-display font-bold text-2xl text-brand-dark">Breeder Subscription Tier</h2>
-              <p class="text-xs text-slate-500">Fair, utility-based pricing designed to replace Trade Me's high listing costs while verifying ethical standards.</p>
+              <img src="${d.photo}" class="w-full h-44 object-cover rounded-2xl mb-3">
+              <h4 class="font-bold text-brand-dark text-base">${d.callName}</h4>
+              <p class="text-xs text-slate-500">${d.name} (${d.role}) · ${d.breed}</p>
+              <p class="text-xs bg-brand-light p-2 rounded-xl mt-2 text-slate-700">${d.health || 'Clearances recorded'}</p>
             </div>
-            <div class="gradient-plum text-white p-6 rounded-3xl shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <span class="text-xs uppercase tracking-wider text-pink-200 font-bold">Your Active Subscription</span>
-                <h3 id="current-tier-title" class="text-2xl font-extrabold font-display">Verified Breeder</h3>
-                <p class="text-xs text-pink-100 mt-1">Platform Processing Guarantee: <strong id="current-tier-comm" class="text-dogsnz-gold">4.5%</strong> per puppy placement</p>
-              </div>
-              <span class="px-4 py-2 bg-brand-pink text-white font-extrabold text-xs rounded-xl shadow tracking-wide">ACTIVE PLAN</span>
+            <div class="flex space-x-2 pt-2 border-t border-slate-100">
+              <button onclick="window.openEditDogModal('${d.id}')" class="flex-1 py-1.5 rounded-xl bg-brand-light text-xs font-bold text-brand-dark hover:bg-brand-pink/20">Edit</button>
+              <button onclick="window.openDogDocModal('${d.id}')" class="flex-1 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">+ Docs</button>
+              <button onclick="window.deleteDog('${d.id}')" class="p-2 text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
             </div>
-            <div id="breeder-tier-comparison-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2"></div>
-          </section>
+          </div>
+        `).join('');
+      }
 
-          <!-- 11. KENNEL SETTINGS (WITH AVATAR PROFILE PHOTO UPLOAD) -->
-          <section id="mod-settings" class="space-y-6 hidden">
-            <h2 class="font-display font-bold text-2xl text-brand-dark">Kennel Settings & Profile Photos</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div class="bg-white p-6 rounded-3xl border border-brand-border/60 space-y-4">
-                <h3 class="font-bold text-sm uppercase text-slate-400">Kennel Public Profile</h3>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Breeder Avatar / Logo</label>
-                  <div class="flex items-center space-x-4 mb-2">
-                    <img id="setting-avatar-preview" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" class="w-16 h-16 rounded-2xl object-cover border-2 border-slate-200">
-                    <input type="file" id="setting-avatar-file" accept="image/*" class="w-full p-2 border border-slate-200 rounded-xl text-xs">
-                  </div>
-                  <input type="url" id="setting-avatar-url" class="w-full p-2 rounded-xl border border-slate-200 text-xs" placeholder="Or Image URL (https://...)">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Kennel Display Name</label>
-                  <input type="text" id="setting-kennel-name" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Dogs NZ Prefix / Kennel ID</label>
-                  <input type="text" id="setting-reg-number" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="e.g. HIGHLAND">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Breed Specialty (Dogs NZ Catalog)</label>
-                  <select id="setting-breeds" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none breed-select-catalog"></select>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Region / Location</label>
-                  <input type="text" id="setting-location" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Kennel Bio & Ethics</label>
-                  <textarea id="setting-bio" rows="3" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none"></textarea>
-                </div>
-                <button type="button" id="btn-save-settings" onclick="window.saveSettings()" class="px-5 py-2.5 rounded-xl gradient-accent text-white font-bold text-sm shadow">Save Profile</button>
-              </div>
-
-              <div class="bg-white p-6 rounded-3xl border border-brand-border/60 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="font-bold text-sm uppercase text-slate-700">Auto-Responder Funnel</h3>
-                  <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Premier Tier Feature</span>
-                </div>
-                <div class="flex items-center space-x-3 pt-2">
-                  <input type="checkbox" id="auto-reply-enabled" class="w-4 h-4 text-brand-pink rounded">
-                  <label for="auto-reply-enabled" class="text-xs font-bold text-slate-700">Enable Automated Inquiry Response</label>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Instant Response Message</label>
-                  <textarea id="auto-reply-text" rows="5" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none" placeholder="Kia ora! Thank you for inquiring..."></textarea>
-                </div>
-                <button type="button" onclick="window.saveAutoResponder()" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow">Save Funnel</button>
-              </div>
+      const heatGrid = document.getElementById('heat-logs-list');
+      if (heatGrid) {
+        heatGrid.innerHTML = myHeats.length ? myHeats.map(h => `
+          <div class="bg-white p-4 rounded-2xl border border-brand-border/60 shadow-sm space-y-2">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-fire-flame-curved text-brand-accent"></i>
+              <h4 class="font-bold text-brand-dark text-sm">${h.damName}</h4>
             </div>
-          </section>
+            <p class="text-xs text-slate-500">Cycle Start: ${h.startDate} ${h.matingDate ? `· Mated: ${h.matingDate}` : ''}</p>
+            ${h.estWhelp ? `<p class="text-xs font-bold text-emerald-600 bg-emerald-50 p-1.5 rounded-lg inline-block">Estimated Whelp: ${h.estWhelp}</p>` : ''}
+          </div>
+        `).join('') : '<p class="col-span-full text-xs text-slate-400 py-6 text-center">No heat cycles logged.</p>';
+      }
 
-          <!-- 12. ADMIN AUDIT -->
-          <section id="mod-admin" class="space-y-6 hidden">
-            <div class="bg-gradient-to-r from-slate-950 via-brand-dark to-brand-primary p-6 sm:p-8 rounded-3xl text-white shadow-xl">
-              <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-pink text-white mb-2 inline-block">Platform Authority</span>
-              <h2 class="font-display font-extrabold text-2xl sm:text-4xl">Admin Audit Queue</h2>
+      const buyersGrid = document.getElementById('buyers-grid');
+      if (buyersGrid) {
+        buyersGrid.innerHTML = myBuyers.length ? myBuyers.map((b, idx) => `
+          <div class="bg-white p-5 rounded-3xl border border-brand-border/60 shadow-sm space-y-2 relative">
+            <span class="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-light text-brand-primary border border-brand-border">
+              Priority #${idx + 1}
+            </span>
+            <h4 class="font-bold text-brand-dark text-sm">${b.name}</h4>
+            <p class="text-xs text-slate-500">${b.contact}</p>
+            <p class="text-xs text-slate-600 bg-brand-light p-2 rounded-xl mt-1">${b.pref || 'Standard Waitlist'}</p>
+          </div>
+        `).join('') : '<p class="col-span-full text-xs text-slate-400 py-6 text-center">No waitlist buyers yet.</p>';
+      }
+
+      const finTable = document.getElementById('finance-table-body');
+      if (finTable) {
+        finTable.innerHTML = myFinances.length ? myFinances.map(f => `
+          <tr class="hover:bg-brand-light/30 transition">
+            <td class="p-3 text-xs">${f.date}</td>
+            <td class="p-3 text-xs font-bold text-brand-dark">${f.category}</td>
+            <td class="p-3 text-xs">${f.desc}</td>
+            <td class="p-3 text-xs font-bold ${f.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}">${f.type}</td>
+            <td class="p-3 text-xs text-right font-bold">$${Number(f.amount).toFixed(2)}</td>
+          </tr>
+        `).join('') : '<tr><td colspan="5" class="p-6 text-center text-xs text-slate-400">No transactions recorded.</td></tr>';
+      }
+
+      window.renderDashboardDetails();
+      window.updateAuthUI();
+    };
+
+    window.renderDashboardDetails = function() {
+      const liveGrid = document.getElementById('dash-live-litters-grid');
+      const activeLitters = (window.appData.litters || []).filter(l => l.isPublished);
+
+      if (liveGrid) {
+        liveGrid.innerHTML = activeLitters.length ? activeLitters.map(l => `
+          <div class="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <img src="${(l.gallery && l.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80'}" class="w-14 h-14 rounded-xl object-cover border border-slate-200">
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-xs text-brand-dark truncate">${l.name}</h4>
+              <p class="text-[10px] text-slate-500">${(l.puppies || []).length} pups logged · $${l.price}</p>
+              <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800">Live on Store</span>
             </div>
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-brand-border/60 space-y-4">
-              <h3 class="font-display font-bold text-xl text-brand-dark">Dogs NZ Verification Queue</h3>
-              <div id="admin-dogsnz-queue" class="overflow-x-auto"></div>
-            </div>
-          </section>
-
-        </main>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- MODALS -->
-
-  <!-- Modal: Breeder Auth -->
-  <div id="modal-auth" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <div class="flex justify-between items-center mb-4">
-        <div>
-          <h3 id="auth-modal-title" class="font-display font-bold text-xl text-brand-dark">Breeder Suite Login</h3>
-          <p class="text-xs text-slate-500">Supabase Cloud Authentication</p>
-        </div>
-        <button type="button" onclick="window.closeModal('modal-auth')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-login-main" onsubmit="window.handleLoginSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Email or Username</label>
-          <input type="text" id="loginEmail" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="breeder@wellbred.co.nz or 'admin'">
-        </div>
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs font-bold uppercase text-slate-500">Password</label>
-            <button type="button" onclick="window.toggleForgotPassView(true)" class="text-[11px] font-bold text-brand-accent hover:underline">Forgot Password?</button>
           </div>
-          <input type="password" id="loginPassword" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="••••••••">
-        </div>
-        <button type="submit" id="btn-auth-submit" class="w-full py-2.5 rounded-xl gradient-accent text-white font-bold text-sm shadow">Sign In / Register</button>
-      </form>
-      <form id="form-forgot-pass" onsubmit="window.handleForgotPasswordSubmit(event)" class="space-y-4 hidden">
-        <p class="text-xs text-slate-600">Enter your account email to receive a password reset link.</p>
-        <input type="email" id="forgotEmail" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="breeder@wellbred.co.nz">
-        <div class="flex space-x-2">
-          <button type="button" onclick="window.toggleForgotPassView(false)" class="w-1/3 py-2 rounded-xl bg-slate-100 text-xs font-bold">Back</button>
-          <button type="submit" id="btn-forgot-submit" class="w-2/3 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow">Send Reset Email</button>
-        </div>
-      </form>
-    </div>
-  </div>
+        `).join('') : `<p class="col-span-full text-xs text-slate-400 py-4 text-center">No live published litters.</p>`;
+      }
 
-  <!-- Modal: Set New Password -->
-  <div id="modal-update-password" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <h3 class="font-display font-bold text-xl text-brand-dark mb-1">Set New Password</h3>
-      <form onsubmit="window.handleUpdateNewPassword(event)" class="space-y-4">
-        <input type="password" id="newPasswordInput" required minlength="6" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="New Password">
-        <button type="submit" class="w-full py-2.5 rounded-xl gradient-accent text-white font-bold text-xs shadow">Update Password & Login</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal: Add or Edit Breeding Dog -->
-  <div id="modal-dog-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-brand-border max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="modal-dog-title" class="font-display font-bold text-xl text-brand-dark">Register Breeding Dog</h3>
-        <button type="button" onclick="window.closeModal('modal-dog-form')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-dog" onsubmit="window.handleDogFormSubmit(event)" class="space-y-4">
-        <input type="hidden" id="dog-edit-id">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Registered Pedigree / Full Name</label>
-          <input type="text" id="dog-name" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Ch. WellBred High Sierra">
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Call Name</label>
-            <input type="text" id="dog-callname" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Sierra">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Role / Gender</label>
-            <select id="dog-role" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-              <option value="Dam">Dam (Female)</option>
-              <option value="Sire">Sire (Male)</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Breed (Dogs NZ Catalog)</label>
-            <select id="dog-breed" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm breed-select-catalog"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Date of Birth</label>
-            <input type="date" id="dog-dob" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-          </div>
-        </div>
-        <div class="p-3 bg-brand-light/50 rounded-2xl border border-brand-border/60 space-y-2">
-          <span class="block text-[10px] font-bold uppercase text-brand-dark">Pedigree Lineage (Parents)</span>
-          <div class="grid grid-cols-2 gap-2">
+      const heatsList = document.getElementById('dash-heats-list');
+      if (heatsList) {
+        heatsList.innerHTML = (window.appData.heatLogs || []).length ? window.appData.heatLogs.map(h => `
+          <div class="p-2.5 rounded-xl bg-pink-50/60 border border-pink-100 text-xs flex justify-between items-center">
             <div>
-              <label class="block text-[10px] text-slate-500">Sire (Father)</label>
-              <input type="text" id="dog-pedigree-sire" class="w-full p-2 rounded-lg border border-slate-200 text-xs" placeholder="e.g. Ch. Silver Baron NZ">
+              <p class="font-bold text-brand-dark">${h.damName}</p>
+              <p class="text-[10px] text-slate-500">Cycle: ${h.startDate}</p>
             </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Dam (Mother)</label>
-              <input type="text" id="dog-pedigree-dam" class="w-full p-2 rounded-lg border border-slate-200 text-xs" placeholder="e.g. Misty Rose of Highland">
-            </div>
+            ${h.estWhelp ? `<span class="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">Whelp: ${h.estWhelp}</span>` : ''}
           </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Photo</label>
-          <input type="file" id="dog-photo-file" accept="image/*" class="w-full p-2 border border-slate-200 rounded-xl text-xs mb-2">
-          <input type="url" id="dog-photo-url" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Or Image URL">
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Health Clearances / DNA Notes</label>
-          <textarea id="dog-health" rows="2" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="DNA Clear, OFA Hips Good, Patellas 0/0"></textarea>
-        </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-dog-form')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" id="btn-save-dog" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Save Dog</button>
-        </div>
-      </form>
-    </div>
-  </div>
+        `).join('') : `<p class="text-xs text-slate-400 py-4 text-center">No active heat cycles.</p>`;
+      }
 
-  <!-- Modal: Attach Document for Dog -->
-  <div id="modal-dog-doc" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <div class="flex justify-between items-center mb-4">
-        <div>
-          <h3 class="font-display font-bold text-xl text-brand-dark">Attach Clearance Document</h3>
-          <p id="doc-dog-name-sub" class="text-xs text-brand-accent font-semibold"></p>
-        </div>
-        <button type="button" onclick="window.closeModal('modal-dog-doc')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-dog-doc" onsubmit="window.handleDogDocSubmit(event)" class="space-y-4">
-        <input type="hidden" id="doc-dog-id">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Clearance Title</label>
-          <input type="text" id="doc-title" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="e.g. Orivet DNA Full Panel / OFA Hips">
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Upload Certificate File (PDF/Image)</label>
-          <input type="file" id="doc-file" required accept="image/*,application/pdf" class="w-full p-2 border border-slate-200 rounded-xl text-xs">
-        </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-dog-doc')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" id="btn-save-doc" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Upload Certificate</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      window.renderTasks();
+    };
 
-  <!-- Modal: Add or Edit Litter -->
-  <div id="modal-litter-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-brand-border max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="modal-litter-title" class="font-display font-bold text-xl text-brand-dark">Register Litter</h3>
-        <button type="button" onclick="window.closeModal('modal-litter-form')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-litter" onsubmit="window.handleLitterFormSubmit(event)" class="space-y-4">
-        <input type="hidden" id="litter-edit-id">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Litter Headline</label>
-          <input type="text" id="litter-name" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Spring Purebred Frenchie Litter">
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Parent Dam</label>
-            <select id="litter-dam" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Parent Sire</label>
-            <select id="litter-sire" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm"></select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Whelp Date</label>
-            <input type="date" id="litter-dob" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Ready Date (Min 8 Weeks)</label>
-            <input type="date" id="litter-ready-date" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Puppy Price ($ NZD)</label>
-            <input type="number" id="litter-price" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="3800">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Breed (Dogs NZ Catalog)</label>
-            <select id="litter-breed" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm breed-select-catalog"></select>
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Cover Photo</label>
-          <input type="file" id="litter-photo-file" accept="image/*" class="w-full p-2 border border-slate-200 rounded-xl text-xs mb-2">
-          <input type="url" id="litter-photo" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Or Image URL">
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Litter Description</label>
-          <textarea id="litter-desc" rows="3" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Raised indoors with ENS..."></textarea>
-        </div>
-        <div class="p-3 bg-dogsnz-light border border-dogsnz-gold/40 rounded-2xl space-y-1 text-xs text-dogsnz-blue">
-          <label class="flex items-start space-x-2">
-            <input type="checkbox" id="litter-ethical-pledge" required class="mt-0.5 rounded text-brand-pink">
-            <span class="text-[11px] text-slate-700 font-semibold">I certify puppies will not leave before 8 weeks and parent health tests are documented.</span>
+    window.renderTasks = function() {
+      const taskList = document.getElementById('dash-task-list');
+      const countEl = document.getElementById('dash-task-count');
+      const tasks = window.appData.tasks || [];
+
+      if (countEl) countEl.innerText = `${tasks.filter(t => !t.completed).length} active`;
+      if (!taskList) return;
+
+      taskList.innerHTML = tasks.length ? tasks.map(t => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+          <label class="flex items-center space-x-2 flex-1 cursor-pointer">
+            <input type="checkbox" onchange="window.toggleTask('${t.id}')" ${t.completed ? 'checked' : ''} class="rounded text-brand-pink">
+            <span class="${t.completed ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">${t.text}</span>
           </label>
+          <button onclick="window.deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600 ml-2"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-litter-form')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" id="btn-save-litter" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Save Litter</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      `).join('') : `<p class="text-xs text-slate-400 py-3 text-center">No reminders set.</p>`;
+    };
 
-  <!-- Modal: Add or Edit Puppy -->
-  <div id="modal-puppy-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="modal-puppy-title" class="font-display font-bold text-xl text-brand-dark">Puppy Profile</h3>
-        <button type="button" onclick="window.closeModal('modal-puppy-form')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-puppy" onsubmit="window.handlePuppyFormSubmit(event)" class="space-y-4">
-        <input type="hidden" id="puppy-litter-id">
-        <input type="hidden" id="puppy-edit-id">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Collar ID / Pet Name</label>
-          <input type="text" id="puppy-identifier" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Pink Collar (Rosie)">
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Gender</label>
-            <select id="puppy-gender" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+    window.handleAddTask = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-task-text');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!window.appData.tasks) window.appData.tasks = [];
+      window.appData.tasks.unshift({ id: 'task-' + Date.now(), text: text, completed: false });
+      input.value = '';
+      window.saveData();
+      window.renderTasks();
+    };
+
+    window.toggleTask = function(taskId) {
+      const t = (window.appData.tasks || []).find(task => task.id === taskId);
+      if (t) {
+        t.completed = !t.completed;
+        window.saveData();
+        window.renderTasks();
+      }
+    };
+
+    window.deleteTask = function(taskId) {
+      window.appData.tasks = (window.appData.tasks || []).filter(task => task.id !== taskId);
+      window.saveData();
+      window.renderTasks();
+    };
+
+    window.handleMassWaitlistBroadcast = function(e) {
+      e.preventDefault();
+      const subject = document.getElementById('mass-broadcast-subject').value.trim();
+      const count = (window.appData.buyers || []).length;
+
+      if (!count) {
+        alert("You currently have 0 waitlist buyers registered.");
+        return;
+      }
+
+      window.appData.notifications.unshift({
+        id: 'n-' + Date.now(),
+        type: 'broadcast',
+        title: `Broadcast: ${subject}`,
+        msg: `Dispatched announcement to all ${count} pre-screened waitlist buyers.`,
+        date: new Date().toLocaleDateString(),
+        read: false
+      });
+
+      window.saveData();
+      e.target.reset();
+      window.showToast(`Broadcast sent to ${count} waitlist buyers!`, "fa-bullhorn");
+    };
+
+    window.renderMarketplaceHome = function() {
+      const grid = document.getElementById('public-marketplace-grid');
+      if (!grid) return;
+
+      const regFilter = document.getElementById('filter-registry').value;
+      const breedFilter = document.getElementById('filter-breed').value;
+      const regionFilter = document.getElementById('filter-region').value;
+
+      let all = [...window.publicMarketplaceLitters];
+
+      if (regFilter === 'dogsnz') all = all.filter(l => l.isDogsNZ);
+      if (regFilter === 'general') all = all.filter(l => !l.isDogsNZ);
+      if (breedFilter !== 'all') all = all.filter(l => l.breed === breedFilter);
+      if (regionFilter !== 'all') all = all.filter(l => (l.location || '').toLowerCase().includes(regionFilter.toLowerCase()));
+
+      grid.innerHTML = all.length ? all.map(l => `
+        <div onclick="window.viewListingDetail('${l.id}')" class="bg-white rounded-3xl overflow-hidden border ${l.isDogsNZ ? 'border-dogsnz-gold/60 ring-1 ring-dogsnz-gold/40' : 'border-brand-border/60'} shadow-sm hover:shadow-xl transition cursor-pointer">
+          <div class="relative">
+            <img src="${(l.gallery && l.gallery[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'}" class="w-full h-52 object-cover">
+            ${l.isDogsNZ ? `
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold shadow-md">
+                <i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Prefix
+              </span>
+            ` : ''}
           </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Color / Markings</label>
-            <input type="text" id="puppy-color" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Lilac Tan">
+          <div class="p-5 space-y-2">
+            <div class="flex justify-between items-start">
+              <h3 class="font-bold text-base text-brand-dark">${l.name}</h3>
+              <span class="font-extrabold text-brand-accent">$${l.price}</span>
+            </div>
+            <p class="text-xs text-slate-500">${l.location || 'New Zealand'} · ${l.breederName}</p>
+            <div class="flex items-center space-x-1.5 pt-1">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-dna mr-1"></i> DNA Cleared</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-brand-primary">Protected Deposit</span>
+            </div>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Microchip Number</label>
-            <input type="text" id="puppy-chip" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="90011300099">
+      `).join('') : '<p class="col-span-full py-12 text-center text-xs text-slate-400">No litters match this filter criteria.</p>';
+    };
+
+    window.renderDirectory = function() {
+      const dirGrid = document.getElementById('directory-grid');
+      if (!dirGrid) return;
+
+      const breeders = [
+        { name: "Highland Pedigrees NZ", location: "Cambridge, Waikato", breeds: "French Bulldog", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80", isDogsNZ: true, prefix: "HIGHLAND" },
+        { name: "Aoraki Goldens NZ", location: "Canterbury", breeds: "Golden Retriever", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80", isDogsNZ: true, prefix: "AORAKI" },
+        { name: "Southern Working Paws", location: "Otago", breeds: "Border Collie", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80", isDogsNZ: false }
+      ];
+
+      if (window.appData.settings && window.appData.settings.kennelName && window.appData.settings.kennelName !== "Highland Pedigrees NZ") {
+        breeders.unshift({
+          name: window.appData.settings.kennelName,
+          location: window.appData.settings.location || 'New Zealand',
+          breeds: window.appData.settings.breeds || 'Pedigree Breeds',
+          avatar: window.appData.settings.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+          isDogsNZ: window.appData.dogsNZCredentials && window.appData.dogsNZCredentials.status === 'approved',
+          prefix: window.appData.dogsNZCredentials ? window.appData.dogsNZCredentials.prefix : ''
+        });
+      }
+
+      dirGrid.innerHTML = breeders.map(b => `
+        <div onclick="window.viewBreederProfile('${b.name}')" class="bg-white rounded-3xl p-6 border ${b.isDogsNZ ? 'border-dogsnz-gold/60 ring-1 ring-dogsnz-gold/30' : 'border-brand-border/60'} shadow-sm space-y-4 cursor-pointer hover:shadow-lg transition">
+          <div class="flex items-center space-x-4">
+            <img src="${b.avatar}" class="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow">
+            <div>
+              <h4 class="font-bold text-base text-brand-dark">${b.name}</h4>
+              <p class="text-xs text-slate-500">${b.location}</p>
+              <span class="inline-block mt-1 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full ${b.isDogsNZ ? 'bg-dogsnz-blue text-dogsnz-gold' : 'bg-pink-100 text-brand-accent'}">
+                ${b.isDogsNZ ? 'Dogs NZ Certified' : 'Verified Breeder'}
+              </span>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Price ($ NZD)</label>
-            <input type="number" id="puppy-price" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="3800">
+          <p class="text-xs text-slate-600">Focus: <strong>${b.breeds}</strong></p>
+          <button class="w-full py-2 bg-brand-light text-brand-primary rounded-xl text-xs font-bold hover:bg-brand-pink/20 transition">View Kennel Profile</button>
+        </div>
+      `).join('');
+    };
+
+    window.populateDropdowns = function() {
+      const damSelect = document.getElementById('litter-dam');
+      const sireSelect = document.getElementById('litter-sire');
+      const heatSelect = document.getElementById('heat-dam-select');
+      const dams = (window.appData.dogs || []).filter(d => d.role === 'Dam');
+      const sires = (window.appData.dogs || []).filter(d => d.role === 'Sire');
+
+      if (damSelect) damSelect.innerHTML = dams.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+      if (sireSelect) sireSelect.innerHTML = sires.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+      if (heatSelect) heatSelect.innerHTML = dams.map(d => `<option value="${d.id}">${d.callName} (${d.breed})</option>`).join('');
+    };
+
+    window.openStripeEscrowCheckout = function(litterId, puppyId) {
+      let litter = (window.appData.litters || []).find(l => l.id === litterId) || (window.publicMarketplaceLitters || []).find(l => l.id === litterId);
+      const puppy = ((litter && litter.puppies) || []).find(p => p.id === puppyId);
+      window.appData.selectedReservePuppy = { litter, puppy };
+      document.getElementById('stripe-checkout-summary').innerHTML = `
+        <div class="flex justify-between"><span>Puppy:</span><strong>${puppy ? puppy.identifier : 'Selected Pup'}</strong></div>
+        <div class="flex justify-between"><span>Price:</span><strong>$${puppy ? puppy.price : 3500} NZD</strong></div>
+        <div class="flex justify-between border-t border-brand-border/60 pt-2 text-brand-dark font-bold">
+          <span>Total Deposit Due:</span><span class="text-emerald-700 font-extrabold">$549.00 NZD</span>
+        </div>
+      `;
+      window.openModal('modal-stripe-checkout');
+    };
+
+    window.handleStripePaymentSubmit = function(e) {
+      e.preventDefault();
+      if (!document.getElementById('contract-agree-check').checked) {
+        alert("Please acknowledge the purchase guarantee.");
+        return;
+      }
+      const sel = window.appData.selectedReservePuppy;
+      if (sel && sel.puppy) sel.puppy.status = 'Reserved';
+
+      window.appData.finances.unshift({
+        id: 'fin-' + Date.now(),
+        type: 'Income',
+        amount: 500,
+        category: 'Puppy Holding Deposit',
+        desc: `Trust deposit received for ${sel && sel.puppy ? sel.puppy.identifier : 'Puppy'}`,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      window.saveData();
+      window.closeModal('modal-stripe-checkout');
+      window.showToast("Protected $500 NZD Holding Deposit locked in trust!", "fa-shield-halved");
+      window.showPage('detail');
+    };
+
+    window.handleRequestPaperwork = function() {
+      window.showToast("Paperwork request dispatched to the breeder!", "fa-file-shield");
+    };
+
+    window.openDogDocModal = function(dogId) {
+      document.getElementById('form-dog-doc').reset();
+      document.getElementById('doc-dog-id').value = dogId;
+      window.openModal('modal-dog-doc');
+    };
+
+    window.handleDogDocSubmit = async function(e) {
+      e.preventDefault();
+      const dogId = document.getElementById('doc-dog-id').value;
+      const title = document.getElementById('doc-title').value.trim();
+      const fileInput = document.getElementById('doc-file');
+      let fileUrl = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1';
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const up = await uploadImageFile(fileInput.files[0], 'docs');
+        if (up) fileUrl = up;
+      }
+      const dog = window.appData.dogs.find(d => d.id === dogId);
+      if (dog) {
+        if (!dog.documents) dog.documents = [];
+        dog.documents.push({ id: 'doc-' + Date.now(), title, url: fileUrl });
+      }
+      window.saveData();
+      window.closeModal('modal-dog-doc');
+      window.showToast("Certificate attached to dog profile!");
+    };
+
+    window.openAddPuppyModal = function(litterId) {
+      document.getElementById('form-puppy').reset();
+      document.getElementById('puppy-litter-id').value = litterId;
+      window.openModal('modal-puppy-form');
+    };
+
+    window.handlePuppyFormSubmit = async function(e) {
+      e.preventDefault();
+      const litterId = document.getElementById('puppy-litter-id').value;
+      const litter = window.appData.litters.find(l => l.id === litterId);
+      let photo = document.getElementById('puppy-photo').value.trim();
+      const fileInput = document.getElementById('puppy-photo-file');
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const up = await uploadImageFile(fileInput.files[0], 'puppies');
+        if (up) photo = up;
+      }
+      if (!photo) photo = (litter && litter.gallery && litter.gallery[0]) || '';
+
+      const puppyPayload = {
+        id: 'p-' + Date.now(),
+        identifier: document.getElementById('puppy-identifier').value,
+        gender: document.getElementById('puppy-gender').value,
+        color: document.getElementById('puppy-color').value,
+        chip: document.getElementById('puppy-chip').value,
+        price: Number(document.getElementById('puppy-price').value),
+        status: document.getElementById('puppy-status').value,
+        photo: photo
+      };
+
+      if (litter) {
+        if (!litter.puppies) litter.puppies = [];
+        litter.puppies.push(puppyPayload);
+      }
+      window.saveData();
+      window.closeModal('modal-puppy-form');
+      window.showToast("Puppy added to litter!");
+    };
+
+    window.openNewMessageModal = function() {
+      const select = document.getElementById('msg-recipient-select');
+      const recipients = [
+        ...window.appData.buyers.map(b => ({ label: `${b.name} (Waitlist Buyer)`, id: b.contact })),
+        { label: "Highland Pedigrees NZ (Dogs NZ Certified)", id: "highland@wellbred.co.nz" },
+        { label: "Aoraki Goldens NZ (Verified Breeder)", id: "aoraki@wellbred.co.nz" }
+      ];
+      select.innerHTML = recipients.map(r => `<option value="${r.label}">${r.label}</option>`).join('');
+      window.openModal('modal-new-message');
+    };
+
+    window.handleSendNewMessage = function(e) {
+      e.preventDefault();
+      const recipient = document.getElementById('msg-recipient-select').value;
+      const text = document.getElementById('msg-body').value;
+
+      let conv = window.appData.conversations.find(c => c.contact === recipient);
+      if (!conv) {
+        conv = { contact: recipient, role: 'Contact', unread: 0, messages: [] };
+        window.appData.conversations.push(conv);
+      }
+
+      conv.messages.push({
+        sender: 'me',
+        text: text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      window.closeModal('modal-new-message');
+      window.saveData();
+      window.showToast("Message dispatched!");
+      window.selectChatContact(recipient);
+    };
+
+    window.renderConversationList = function() {
+      const list = document.getElementById('chat-conversations-list');
+      if (!list) return;
+
+      if (!window.appData.conversations || window.appData.conversations.length === 0) {
+        list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">No active messages. Click 'New Message' above.</div>`;
+        return;
+      }
+
+      list.innerHTML = window.appData.conversations.map(c => `
+        <div onclick="window.selectChatContact('${c.contact}')" class="p-4 cursor-pointer hover:bg-brand-light/60 transition ${currentActiveChatContact === c.contact ? 'bg-brand-light border-l-4 border-brand-pink' : ''}">
+          <div class="flex justify-between items-center mb-1">
+            <h5 class="text-xs font-bold text-brand-dark truncate max-w-[150px]">${c.contact}</h5>
+            ${c.unread > 0 ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-brand-accent text-white">${c.unread} new</span>` : ''}
+          </div>
+          <p class="text-[11px] text-slate-500 truncate">${c.messages && c.messages.length ? c.messages[c.messages.length - 1].text : 'No messages'}</p>
+        </div>
+      `).join('');
+    };
+
+    window.selectChatContact = function(contactName) {
+      currentActiveChatContact = contactName;
+      const conv = window.appData.conversations.find(c => c.contact === contactName);
+      if (conv) conv.unread = 0;
+
+      document.getElementById('chat-active-name').innerText = contactName;
+      document.getElementById('chat-active-role').innerText = conv ? conv.role : 'Contact';
+      
+      const msgArea = document.getElementById('chat-messages-area');
+      msgArea.innerHTML = (conv && conv.messages && conv.messages.length) ? conv.messages.map(m => `
+        <div class="flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[75%] p-3 rounded-2xl text-xs ${m.sender === 'me' ? 'gradient-accent text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'}">
+            <p>${m.text}</p>
+            <span class="block text-[9px] mt-1 text-right ${m.sender === 'me' ? 'text-pink-100' : 'text-slate-400'}">${m.time}</span>
           </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Status</label>
-          <select id="puppy-status" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-            <option value="Available">Available</option>
-            <option value="Reserved">Reserved</option>
-            <option value="Sold">Sold</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Puppy Photo</label>
-          <input type="file" id="puppy-photo-file" accept="image/*" class="w-full p-2 border border-slate-200 rounded-xl text-xs mb-2">
-          <input type="url" id="puppy-photo" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Or Image URL">
-        </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-puppy-form')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" id="btn-save-puppy" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Save Puppy</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      `).join('') : `<div class="text-center py-16 text-slate-400 text-xs">No message history. Send a reply below.</div>`;
 
-  <!-- Modal: Compose Message -->
-  <div id="modal-new-message" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-display font-bold text-xl text-brand-dark">Compose Message</h3>
-        <button type="button" onclick="window.closeModal('modal-new-message')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form onsubmit="window.handleSendNewMessage(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Recipient</label>
-          <select id="msg-recipient-select" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Message</label>
-          <textarea id="msg-body" rows="4" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm outline-none" placeholder="Write message..."></textarea>
-        </div>
-        <div class="flex justify-end space-x-2 pt-2">
-          <button type="button" onclick="window.closeModal('modal-new-message')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl gradient-accent text-white font-bold text-xs shadow">Send</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      msgArea.scrollTop = msgArea.scrollHeight;
+      window.updateAuthUI();
+      window.renderConversationList();
+    };
 
-  <!-- Modal: Holding Deposit Checkout -->
-  <div id="modal-stripe-checkout" class="fixed inset-0 bg-brand-dark/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-brand-border space-y-5 max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center border-b pb-4">
-        <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-shield-halved text-2xl text-emerald-600"></i>
-          <span class="font-display font-extrabold text-base text-slate-800">Protected Holding Deposit</span>
-        </div>
-        <button type="button" onclick="window.closeModal('modal-stripe-checkout')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-      </div>
-      <div id="stripe-checkout-summary" class="bg-brand-light p-4 rounded-2xl border border-brand-border/60 text-xs space-y-2"></div>
-      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] text-slate-700 space-y-2">
-        <div class="flex items-center justify-between font-bold text-brand-dark">
-          <span><i class="fa-solid fa-file-contract text-brand-pink mr-1"></i> New Zealand Holding Trust Agreement</span>
-          <span class="text-[9px] uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Legal Guarantee</span>
-        </div>
-        <p class="leading-relaxed">
-          1. <strong>7-Day Vet Guarantee:</strong> Full refund if independent vet exam reveals congenital health defects.<br>
-          2. <strong>Held in Trust:</strong> Funds remain securely locked in trust until pickup verification at 8+ weeks.
-        </p>
-        <label class="flex items-center space-x-2 pt-1 font-semibold text-slate-800">
-          <input type="checkbox" id="contract-agree-check" required class="rounded text-brand-pink">
-          <span>I agree to the Standard New Zealand Puppy Purchase Guarantee</span>
-        </label>
-      </div>
-      <form onsubmit="window.handleStripePaymentSubmit(event)" class="space-y-3">
-        <input type="text" id="escrow-cardholder" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Cardholder Name">
-        <input type="text" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-mono" placeholder="Card Number 4242 •••• •••• 4242">
-        <div class="grid grid-cols-2 gap-3">
-          <input type="text" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-mono" placeholder="MM/YY">
-          <input type="text" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-mono" placeholder="CVC">
-        </div>
-        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-lg transition mt-4">
-          Pay $549.00 NZD (Deposit & Guarantee)
-        </button>
-      </form>
-    </div>
-  </div>
+    window.handleSendChatMessage = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-reply-input');
+      const text = input.value.trim();
+      if (!text || !currentActiveChatContact) return;
 
-  <!-- Modal: Breeder Subscription Stripe Checkout Portal -->
-  <div id="modal-subscription-checkout" class="fixed inset-0 bg-brand-dark/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border space-y-4">
-      <div class="flex justify-between items-center border-b pb-3">
-        <div class="flex items-center space-x-2">
-          <i class="fa-brands fa-stripe text-3xl text-[#635BFF]"></i>
-          <span class="font-display font-extrabold text-base text-slate-800">Stripe Billing Portal</span>
-        </div>
-        <button type="button" onclick="window.closeModal('modal-subscription-checkout')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-      </div>
-      <div id="sub-checkout-summary" class="bg-brand-light p-4 rounded-2xl border border-brand-border/60 text-xs space-y-2"></div>
-      <form onsubmit="window.handleConfirmSubscriptionPayment(event)" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Billing Email</label>
-          <input type="email" id="sub-card-email" required class="w-full p-2 rounded-xl border border-slate-200 text-xs font-medium">
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Card Details</label>
-          <input type="text" required class="w-full p-2 rounded-xl border border-slate-200 text-xs font-mono" placeholder="4242 •••• •••• 4242">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <input type="text" required class="w-full p-2 rounded-xl border border-slate-200 text-xs font-mono" placeholder="MM/YY">
-          <input type="text" required class="w-full p-2 rounded-xl border border-slate-200 text-xs font-mono" placeholder="CVC">
-        </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl gradient-accent text-white font-bold text-xs shadow mt-2">
-          Confirm Subscription & Activate Tier
-        </button>
-      </form>
-    </div>
-  </div>
+      const conv = window.appData.conversations.find(c => c.contact === currentActiveChatContact);
+      if (conv) {
+        if (!conv.messages) conv.messages = [];
+        conv.messages.push({
+          sender: 'me',
+          text: text,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+      }
 
-  <!-- Modal: Heat Log -->
-  <div id="modal-heat-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-display font-bold text-xl text-brand-dark">Log Heat Cycle</h3>
-        <button type="button" onclick="window.closeModal('modal-heat-form')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-heat" onsubmit="window.handleHeatFormSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Breeding Dam</label>
-          <select id="heat-dam-select" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Heat Cycle Start Date</label>
-          <input type="date" id="heat-start-date" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Mating Date (Optional)</label>
-          <input type="date" id="heat-mating-date" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        </div>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-heat-form')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Save Heat Log</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      input.value = '';
+      window.saveData();
+      window.selectChatContact(currentActiveChatContact);
+    };
 
-  <!-- Modal: Waitlist Buyer -->
-  <div id="modal-buyer-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-display font-bold text-xl text-brand-dark">Waitlist Buyer</h3>
-        <button type="button" onclick="window.closeModal('modal-buyer-form')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-buyer" onsubmit="window.handleBuyerFormSubmit(event)" class="space-y-4">
-        <input type="text" id="buyer-name" required placeholder="Full Name" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="text" id="buyer-contact" required placeholder="Contact Phone / Email" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Desired Breed</label>
-          <select id="buyer-form-breed" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm breed-select-catalog"></select>
-        </div>
-        <textarea id="buyer-pref" rows="3" placeholder="Preferences & Notes" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm"></textarea>
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-buyer-form')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Save Buyer</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    window.renderNotificationsTab = function() {
+      const container = document.getElementById('notifications-container');
+      if (!container) return;
 
-  <!-- Modal: Finance Transaction -->
-  <div id="modal-finance-form" class="fixed inset-0 bg-brand-dark/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-brand-border">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-display font-bold text-xl text-brand-dark">Log Transaction</h3>
-        <button type="button" onclick="window.closeModal('modal-finance-form')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-finance" onsubmit="window.handleFinanceFormSubmit(event)" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-          <select id="fin-type" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-            <option value="Income">Income (+)</option>
-            <option value="Expense">Expense (-)</option>
-          </select>
-          <input type="number" id="fin-amount" required step="0.01" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm" placeholder="Amount ($)">
+      if (!window.appData.notifications || window.appData.notifications.length === 0) {
+        container.innerHTML = `<div class="bg-white p-8 rounded-3xl text-center text-xs text-slate-400">No active notifications.</div>`;
+        return;
+      }
+
+      container.innerHTML = window.appData.notifications.map(n => `
+        <div class="bg-white rounded-3xl p-4 border border-brand-border/60 shadow-sm flex items-start justify-between">
+          <div class="flex items-start space-x-3">
+            <div class="w-10 h-10 rounded-2xl ${n.type === 'paperwork' ? 'bg-purple-100 text-brand-primary' : 'bg-pink-100 text-brand-accent'} flex items-center justify-center text-sm font-bold mt-0.5">
+              <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm text-brand-dark">${n.title}</h4>
+              <p class="text-xs text-slate-600 mt-0.5">${n.msg}</p>
+              <span class="text-[10px] text-slate-400">${n.date}</span>
+            </div>
+          </div>
         </div>
-        <input type="text" id="fin-cat" required placeholder="Category (e.g. Puppy Deposit / Vet Bill)" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="text" id="fin-desc" required placeholder="Description" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="date" id="fin-date" required class="w-full p-2.5 rounded-xl border border-slate-200 text-sm">
-        <div class="flex justify-end space-x-3 pt-2">
-          <button type="button" onclick="window.closeModal('modal-finance-form')" class="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl gradient-accent text-white text-xs font-semibold shadow">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      `).join('');
+    };
+
+    window.markAllNotificationsRead = function() {
+      (window.appData.notifications || []).forEach(n => n.read = true);
+      window.saveData();
+      window.updateAuthUI();
+      window.renderNotificationsTab();
+    };
+
+    window.renderDogsNZPortalTab = function() {
+      const creds = window.appData.dogsNZCredentials || {};
+      const statusBadge = document.getElementById('dogsnz-status-badge');
+      if (statusBadge) {
+        if (creds.status === 'approved') {
+          statusBadge.innerHTML = `<span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-dogsnz-blue text-dogsnz-gold border border-dogsnz-gold"><i class="fa-solid fa-award mr-1"></i> Dogs NZ Certified Member</span>`;
+        } else if (creds.status === 'pending') {
+          statusBadge.innerHTML = `<span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800"><i class="fa-solid fa-clock mr-1"></i> Pending Manual Audit</span>`;
+        } else {
+          statusBadge.innerHTML = `<span class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600">Unverified</span>`;
+        }
+      }
+    };
+
+    window.handleDogsNZSubmit = async function(e) {
+      e.preventDefault();
+      const memNum = document.getElementById('dogsnz-mem-num').value.trim();
+      const prefix = document.getElementById('dogsnz-prefix').value.trim();
+      const club = document.getElementById('dogsnz-club').value.trim();
+
+      window.appData.dogsNZCredentials = {
+        status: 'pending',
+        membershipNumber: memNum,
+        prefix: prefix,
+        club: club,
+        submittedAt: new Date().toLocaleDateString()
+      };
+
+      window.saveData();
+      window.renderDogsNZPortalTab();
+      window.showToast("Dogs NZ Credentials submitted for audit!", "fa-award");
+    };
+
+    window.renderAdminAuditQueue = function() {
+      const queue = document.getElementById('admin-dogsnz-queue');
+      if (!queue) return;
+      const creds = window.appData.dogsNZCredentials;
+      if (!creds || creds.status === 'unverified') {
+        queue.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">No pending verification applications.</div>`;
+        return;
+      }
+      queue.innerHTML = `
+        <table class="w-full text-left text-sm text-slate-600">
+          <thead class="bg-brand-light font-bold text-xs uppercase text-brand-dark">
+            <tr><th class="p-3">Breeder</th><th class="p-3">Member #</th><th class="p-3">Prefix</th><th class="p-3">Status</th><th class="p-3 text-right">Action</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-3 font-bold text-xs">${window.appData.settings.kennelName}</td>
+              <td class="p-3 text-xs font-mono">${creds.membershipNumber}</td>
+              <td class="p-3 text-xs font-bold text-dogsnz-blue">${creds.prefix}</td>
+              <td class="p-3 text-xs font-bold ${creds.status === 'approved' ? 'text-emerald-600' : 'text-amber-600'}">${creds.status.toUpperCase()}</td>
+              <td class="p-3 text-right">
+                ${creds.status !== 'approved' ? `<button onclick="window.adminSetDogsNZStatus('approved')" class="px-3 py-1 bg-dogsnz-blue text-dogsnz-gold rounded-lg font-bold text-xs shadow">Approve</button>` : `<button onclick="window.adminSetDogsNZStatus('unverified')" class="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg font-bold text-xs">Revoke</button>`}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    };
+
+    window.adminSetDogsNZStatus = function(newStatus) {
+      window.appData.dogsNZCredentials.status = newStatus;
+      if (newStatus === 'approved') {
+        window.appData.currentUser.tier = 'Dogs NZ Pedigree Member';
+      }
+      window.saveData();
+      window.updateAuthUI();
+      window.renderAdminAuditQueue();
+      window.showToast(`Dogs NZ Credential updated to ${newStatus}!`, 'fa-award');
+    };
+
+    // System Startup
+    document.addEventListener('DOMContentLoaded', async () => {
+      initBreedCatalogs();
+
+      if (window.supabaseClient) {
+        const { data } = await window.supabaseClient.auth.getSession();
+        if (data && data.session && data.session.user) {
+          window.appData.currentUser = {
+            id: data.session.user.id,
+            email: data.session.user.email,
+            role: "breeder",
+            kennel: data.session.user.email.split('@')[0] + ' Kennel',
+            tier: "Verified Breeder"
+          };
+          await window.loadUserDataFromCloud();
+        }
+      }
+      window.updateAuthUI();
+      window.renderAllModules();
+      await window.loadPublicMarketplaceLitters();
+      window.showPage('home');
+    });
+  </script>
+</body>
+</html>
